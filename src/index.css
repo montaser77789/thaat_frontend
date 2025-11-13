@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #19257d;
+}
+
+html {
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  scrollbar-color: var(--color-primary) #f1f1f1;
+}
+html , body {
+  @apply overflow-x-hidden;
+}
+
+.PhoneInput div.relative  {
+  flex:  1 ;
+}
+
+.PhoneInputInput {
+  border: 1px solid #d1d5db; /* gray-300 */
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  margin-top: 0.25rem;
+  text-align: left;
+  outline: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  font-size: 1rem;
+  width: 100% !important;
+  background-color: transparent;
+}
+.PhoneInputCountry{
+  border: 1px solid #d1d5db; /* gray-300 */
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  margin-top: 0.25rem;
+  text-align: left;
+  outline: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  font-size: 1rem;
+  background-color: transparent;
+}
