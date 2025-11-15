@@ -71,7 +71,7 @@ export default function Navbar({
   return (
     <nav
       style={{ left: `${sidebarOpen ? sidebarWidth : 64}px` }}
-      className="fixed top-0  right-0 bg-white border-b border-gray-200 shadow-sm transition-all duration-300"
+      className="fixed top-0  right-0 bg-white border-b z-100 border-gray-200 shadow-sm transition-all duration-300"
     >
       <div className="flex items-center justify-between h-14 px-6">
         {/* Left side - Menu Toggle Button */}

@@ -7,8 +7,12 @@ export type PatientStatus =
   | "Payment Completed"
   | "Medical Team On The Way";
 
-export type TransactionStatus = "Successful" | "Pending" | "Failed" | "-";
-
+export type TransactionStatus =
+  | "Successful"
+  | "Pending"
+  | "Cancelled"
+  | "Refunded"
+  | "-";
 
 export type ActionOption =
   | "View Details"
@@ -17,4 +21,3 @@ export type ActionOption =
   | "Send to SP"
   | "Child Appointment"
   | "Send to Teams";
-

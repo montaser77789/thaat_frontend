@@ -1,10 +1,17 @@
-import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import type { ActionOption, PatientStatus } from "./types";
-import type { PatientRow } from "../../interfaces/indrx";
-import { FiCheckCircle, FiFilter } from "react-icons/fi";
+import React, { useMemo, useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiCheckCircle, FiFilter, FiSearch, FiPlus } from "react-icons/fi";
 
-// ================== Options ==================
+import { useGetConsultationRequestsQuery } from "../../app/Api/Slices/ConsultationApiSlice";
+import { PaginationControls } from "../ui/PaginationControls";
+
+import type { ActionOption, PatientStatus, TransactionStatus } from "./types";
+import type { PatientRow } from "../../interfaces/indrx";
+import type { ConsultationRequest } from "../../interfaces/consultationRequest";
+import { Td, Th } from "../ui/Tables";
+
+// ================== Types / Maps ==================
+
 const PATIENT_STATUS_OPTIONS: PatientStatus[] = [
   "New Order",
   "Under Revision",
@@ -15,7 +22,7 @@ const PATIENT_STATUS_OPTIONS: PatientStatus[] = [
   "Medical Team On The Way",
 ];
 
-const TRANSACTION_STATUS_OPTIONS = [
+const TRANSACTION_STATUS_OPTIONS: TransactionStatus[] = [
   "Successful",
   "Pending",
   "Cancelled",
@@ -33,14 +40,72 @@ const ACTION_OPTIONS: ActionOption[] = [
   "Send to Teams",
 ];
 
-export default function PatientList({ rows }: { rows: PatientRow[] }) {
+const STATUS_MAP: Record<number, PatientStatus> = {
+  0: "New Order",
+  1: "Under Revision",
+  2: "Dispatch To Service Provider",
+  3: "Order Confirmed",
+  4: "Invoice Sent",
+  5: "Payment Completed",
+  6: "Medical Team On The Way",
+};
+
+function mapStatus(status: number | null): PatientStatus {
+  if (status == null) return "New Order";
+  return STATUS_MAP[status] ?? "New Order";
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-GB");
+};
+
+function mapConsultationToRow(item: ConsultationRequest): PatientRow {
+  return {
+    id: item.id,
+    patientName: item.name,
+    serviceType: item.service.name || "-",
+    status: mapStatus(item.status),
+    date: formatDate(item.created_at),
+    transactionStatus: (item.payment_status as TransactionStatus) || "-",
+    paymentMethod: item.payment_method || "-",
+    serviceProviderName: item.service_provider_name || "-",
+    orderPrice: item.selling_cost ?? 0,
+  };
+}
+
+// ================== Component ==================
+export default function PatientList() {
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const page = Number(searchParams.get("page") || "1");
+  const perPage = Number(searchParams.get("per_page") || "10");
+
+  const { data, isLoading } = useGetConsultationRequestsQuery({
+    page,
+    limit: perPage,
+    search: searchQuery || undefined,
+  });
+
+  const pagination = data?.pagination ?? {
+    total: 0,
+    totalPages: 1,
+    currentPage: page,
+    perPage,
+  };
+
+  const totalPages = pagination.totalPages || 1;
+
+  // نحول الداتا اللي جاية من الباك لصفوف الجدول
+  const rows: PatientRow[] = (data?.data || []).map(mapConsultationToRow);
 
   // ================== Filters state ==================
   const [patientStatusFilter, setPatientStatusFilter] = useState<string>("");
-  const [transactionStatusFilter, setTransactionStatusFilter] =
-    useState<string>("");
+  const [transactionStatusFilter, setTransactionStatusFilter] = useState<string>("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>("");
   const [partnerFilter, setPartnerFilter] = useState<string>("");
   const [createdFrom, setCreatedFrom] = useState<string>("");
@@ -98,12 +163,7 @@ export default function PatientList({ rows }: { rows: PatientRow[] }) {
   };
 
   // ================== Row state (status / actions) ==================
-  const [statuses, setStatuses] = useState<Record<number, PatientStatus>>(() =>
-    rows.reduce(
-      (acc, row) => ({ ...acc, [row.id]: row.status }),
-      {} as Record<number, PatientStatus>
-    )
-  );
+  const [statuses, setStatuses] = useState<Record<number, PatientStatus>>({});
 
   const handleStatusChange = (id: number, newStatus: PatientStatus) => {
     setStatuses((prev) => ({ ...prev, [id]: newStatus }));
@@ -127,151 +187,172 @@ export default function PatientList({ rows }: { rows: PatientRow[] }) {
   };
 
   return (
-    <div className="">
-      <div className="rounded-lg bg-white shadow-lg border border-gray-200">
-        {/* Header */}
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header with title and add button */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Patient Records</h1>
+          <p className="text-gray-600 mt-1">
+            Medical appointments and patient management
+          </p>
+        </div>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-md mt-4 md:mt-0">
+          <FiPlus className="mr-2" />
+          Add New Patient
+        </button>
+      </div>
 
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Patient Records
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Medical appointments and patient management
-              </p>
+      {/* Filters and search */}
+      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="text-gray-400" />
             </div>
+            <input
+              type="text"
+              placeholder="Search patients by name or service..."
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-            {/* Filters button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowFilters((prev) => !prev)}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all"
-              >
-                {filtersApplied ? (
-                  <FiCheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <FiFilter className="h-4 w-4 text-gray-500" />
-                )}
-                <span>Filters</span>
-              </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all"
+            >
+              {filtersApplied ? (
+                <FiCheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <FiFilter className="h-4 w-4 text-gray-500" />
+              )}
+              <span>Filters</span>
+            </button>
 
-              {showFilters && (
-                <div className="absolute right-0 mt-2 w-80 rounded-xl bg-white shadow-xl border border-gray-200 z-20">
-                  <div className="p-4 space-y-4">
-                    {/* Patient Status Filters */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800 mb-2">
-                        Patient Status
-                      </p>
-                      <select
-                        value={patientStatusFilter}
-                        onChange={(e) => setPatientStatusFilter(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option value="">Select Patient Status</option>
-                        {PATIENT_STATUS_OPTIONS.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+            {showFilters && (
+              <div className="absolute right-0 mt-2 w-80 rounded-xl bg-white shadow-xl border border-gray-200 z-20">
+                <div className="p-4 space-y-4">
+                  {/* Patient Status Filters */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800 mb-2">
+                      Patient Status
+                    </p>
+                    <select
+                      value={patientStatusFilter}
+                      onChange={(e) => setPatientStatusFilter(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">Select Patient Status</option>
+                      {PATIENT_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                    {/* Transaction Status Filters */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800 mb-2">
-                        Transaction Status
-                      </p>
-                      <select
-                        value={transactionStatusFilter}
-                        onChange={(e) =>
-                          setTransactionStatusFilter(e.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option value="">Select Payment Status</option>
-                        {TRANSACTION_STATUS_OPTIONS.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Transaction Status Filters */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800 mb-2">
+                      Transaction Status
+                    </p>
+                    <select
+                      value={transactionStatusFilter}
+                      onChange={(e) =>
+                        setTransactionStatusFilter(e.target.value)
+                      }
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">Select Payment Status</option>
+                      {TRANSACTION_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                    {/* Payment Method Filters */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800 mb-2">
-                        Payment Method
-                      </p>
-                      <select
-                        value={paymentMethodFilter}
-                        onChange={(e) => setPaymentMethodFilter(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option value="">Select Payment Method</option>
-                        {PAYMENT_METHOD_OPTIONS.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Payment Method Filters */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800 mb-2">
+                      Payment Method
+                    </p>
+                    <select
+                      value={paymentMethodFilter}
+                      onChange={(e) => setPaymentMethodFilter(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">Select Payment Method</option>
+                      {PAYMENT_METHOD_OPTIONS.map((method) => (
+                        <option key={method} value={method}>
+                          {method}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                    {/* Buttons */}
-                    <div className="flex gap-2 pt-3 border-t border-gray-100">
-                      <button
-                        type="button"
-                        onClick={handleResetFilters}
-                        className="flex-1 rounded-lg border border-gray-400 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Reset
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleApplyFilters}
-                        className="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-                      >
-                        Apply
-                      </button>
-                    </div>
+                  {/* Buttons */}
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="flex-1 rounded-lg border border-gray-400 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyFilters}
+                      className="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      Apply
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Table Container: الاسكرول الأفقي هنا بس */}
-        <div className="overflow-auto rounded-lg  mt-2 shadow-sm">
-          <table className=" text-sm">
-            <thead className="sticky top-0 z-10">
-              <tr className="bg-linear-to-r from-blue-800 to-blue-400 text-white">
-                <Th className="text-center">ID</Th>
-                <Th>Patient Name</Th>
-                <Th>Types of Services/Symptoms</Th>
-                <Th>Patient Status</Th>
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+                <Th className="text-left">ID</Th>
+                <Th className="text-left">Patient Name</Th>
+                <Th className="text-left">Service Type</Th>
+                <Th className="text-left">Status</Th>
                 <Th className="text-center">Date</Th>
-                <Th className="text-center">Transaction Status</Th>
+                <Th className="text-center">Transaction</Th>
                 <Th className="text-center">Payment Method</Th>
                 <Th className="text-center">Service Provider</Th>
                 <Th className="text-center">Order Price</Th>
                 <Th className="text-center">Actions</Th>
               </tr>
             </thead>
-            <tbody>
-              {rows.length > 0 ? (
-                rows.map((row, idx) => (
+            <tbody className="divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <Td colSpan={10} className="text-center py-8 text-gray-500">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                    <p className="mt-2">Loading patient records...</p>
+                  </Td>
+                </tr>
+              ) : rows.length > 0 ? (
+                rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`border-b border-gray-200 ${
-                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } hover:bg-blue-50 transition-colors`}
+                    className="hover:bg-gray-50 transition-colors"
                   >
-                    <Td className="text-center font-bold text-blue-600">
-                      {row.id}
-                    </Td>
-                    <Td className="font-semibold text-gray-900">
+                    <Td className="font-medium text-gray-900">#{row.id}</Td>
+                    <Td className="font-medium text-gray-900">
                       {row.patientName}
                     </Td>
                     <Td className="text-gray-700">{row.serviceType}</Td>
@@ -279,14 +360,14 @@ export default function PatientList({ rows }: { rows: PatientRow[] }) {
                     {/* Patient Status */}
                     <Td>
                       <select
-                        value={statuses[row.id]}
+                        value={statuses[row.id] || row.status}
                         onChange={(e) =>
                           handleStatusChange(
                             row.id,
                             e.target.value as PatientStatus
                           )
                         }
-                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
                       >
                         {PATIENT_STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status}>
@@ -296,113 +377,120 @@ export default function PatientList({ rows }: { rows: PatientRow[] }) {
                       </select>
                     </Td>
 
-                    <Td className="text-center whitespace-nowrap">
+                    <Td className="text-center whitespace-nowrap text-gray-600">
                       {row.date}
                     </Td>
 
-                    {/* Transaction Status badge */}
+                    {/* Transaction Status */}
                     <Td className="text-center">
                       {row.transactionStatus === "Successful" ? (
-                        <span className="inline-flex items-center rounded-full border border-green-400 bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="w-2 h-2 rounded-full bg-green-500 mr-1"></span>
                           Successful
                         </span>
-                      ) : row.transactionStatus === "-" ? (
-                        <span className="text-gray-400">—</span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-yellow-400 bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700">
-                          {row.transactionStatus}
+                      ) : row.transactionStatus === "Pending" ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <span className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>
+                          Pending
                         </span>
+                      ) : row.transactionStatus === "Cancelled" ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          <span className="w-2 h-2 rounded-full bg-red-500 mr-1"></span>
+                          Cancelled
+                        </span>
+                      ) : row.transactionStatus === "Refunded" ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <span className="w-2 h-2 rounded-full bg-purple-500 mr-1"></span>
+                          Refunded
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
                       )}
                     </Td>
 
-                    <Td className="text-center">{row.paymentMethod}</Td>
-                    <Td className="text-center">{row.serviceProviderName}</Td>
+                    <Td className="text-center text-gray-600">
+                      {row.paymentMethod}
+                    </Td>
+                    
+                    <Td className="text-center text-gray-600">
+                      {row.serviceProviderName}
+                    </Td>
+                    
                     <Td className="text-center font-bold text-green-600">
-                      {row.orderPrice}
+                      ${row.orderPrice.toLocaleString()}
                     </Td>
 
                     {/* Actions */}
-                    <Td className="text-center">
-                      <select
-                        defaultValue=""
-                        onChange={(e) => {
-                          const value = e.target.value as ActionOption | "";
-                          if (!value) return;
-                          handleActionChange(row.id, value as ActionOption);
-                          e.currentTarget.value = "";
-                        }}
-                        className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[130px]"
-                      >
-                        <option value="" disabled>
-                          Actions
-                        </option>
-                        {ACTION_OPTIONS.map((action) => (
-                          <option key={action} value={action}>
-                            {action}
+                    <Td>
+                      <div className="flex justify-center">
+                        <select
+                          defaultValue=""
+                          onChange={(e) => {
+                            const value = e.target.value as ActionOption | "";
+                            if (!value) return;
+                            handleActionChange(row.id, value as ActionOption);
+                            e.currentTarget.value = "";
+                          }}
+                          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px] transition-all hover:bg-blue-700"
+                        >
+                          <option value="" disabled>
+                            Select Action
                           </option>
-                        ))}
-                      </select>
+                          {ACTION_OPTIONS.map((action) => (
+                            <option key={action} value={action}>
+                              {action}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </Td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={10}
-                    className="h-24 text-center text-gray-500 text-base font-semibold"
-                  >
-                    No Patient Data Available
-                  </td>
+                  <Td colSpan={10} className="text-center py-8 text-gray-500">
+                    <div className="flex flex-col items-center">
+                      <div className="text-4xl mb-2">📋</div>
+                      <p className="text-lg font-semibold">No Patient Data Available</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        No patient records found matching your criteria
+                      </p>
+                    </div>
+                  </Td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">
-              Showing 1–{rows.length} of {rows.length}
-            </span>
-            <div className="flex gap-2">
-              <button className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                Previous
-              </button>
-              <button className="px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-sm font-medium text-blue-700">
-                1
-              </button>
-              <button className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                Next
-              </button>
-            </div>
+        {/* Table footer with pagination */}
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+          <div className="text-sm text-gray-700 mb-2 md:mb-0">
+            Showing{" "}
+            <span className="font-medium">{rows.length}</span> of{" "}
+            <span className="font-medium">{pagination.total}</span> patients
           </div>
+          
+          <PaginationControls
+            currentPage={page}
+            totalPages={totalPages}
+            perPage={perPage}
+            onPageChange={(newPage, newPerPage) => {
+              setSearchParams((prev) => {
+                const params = new URLSearchParams(prev);
+                params.set("page", String(newPage));
+                params.set("per_page", String(newPerPage));
+                if (searchQuery) {
+                  params.set("search", searchQuery);
+                } else {
+                  params.delete("search");
+                }
+                return params;
+              });
+            }}
+          />
         </div>
       </div>
     </div>
   );
 }
-
-// ============= Small helpers =============
-const Th: React.FC<React.ThHTMLAttributes<HTMLTableCellElement>> = ({
-  className = "",
-  children,
-  ...rest
-}) => (
-  <th
-    className={`px-4 py-3 text-sm font-bold uppercase tracking-wide ${className}`}
-    {...rest}
-  >
-    {children}
-  </th>
-);
-
-const Td: React.FC<React.TdHTMLAttributes<HTMLTableCellElement>> = ({
-  className = "",
-  children,
-  ...rest
-}) => (
-  <td className={`px-4 py-3 ${className}`} {...rest}>
-    {children}
-  </td>
-);

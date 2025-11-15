@@ -3,12 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { CityApiSlice } from "./Api/Slices/CityApiSlice";
 import { AuthApiSlice } from "./Api/Slices/AuthApiSlice";
 import { ServiceApiSlice } from "./Api/Slices/ServiceApiSlice";
+import { ConsultationApiSlice } from "./Api/Slices/ConsultationApiSlice";
+import { CountryApiSlice } from "./Api/Slices/CountryApiSlice";
+import { partenersApiSlice } from "./Api/Slices/partenersApiSlice";
 
 export const store = configureStore({
   reducer: {
     [CityApiSlice.reducerPath]: CityApiSlice.reducer,
     [AuthApiSlice.reducerPath]: AuthApiSlice.reducer,
     [ServiceApiSlice.reducerPath]: ServiceApiSlice.reducer,
+    [ConsultationApiSlice.reducerPath]: ConsultationApiSlice.reducer,
+    [CountryApiSlice.reducerPath]: CountryApiSlice.reducer,
+    [partenersApiSlice.reducerPath]: partenersApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -16,7 +22,10 @@ export const store = configureStore({
     }).concat(
       CityApiSlice.middleware,
       AuthApiSlice.middleware,
-      ServiceApiSlice.middleware
+      ServiceApiSlice.middleware,
+      ConsultationApiSlice.middleware,
+      CountryApiSlice.middleware,
+      partenersApiSlice.middleware
     ),
 });
 

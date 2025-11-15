@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import PatientList from "../../components/consultation_requests/PatientList";
-import type { PatientRow } from "../../interfaces/indrx";
 import Button from "../../components/ui/Button";
 import { FiPlus } from "react-icons/fi";
 import { Controller, useForm } from "react-hook-form";
@@ -14,47 +13,15 @@ import Textarea from "../../components/ui/Textarea";
 import "react-international-phone/style.css";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import "react-phone-number-input/style.css";
+
 import { consultationSchema } from "../../validation/consultation";
 import { useGetCityQuery } from "../../app/Api/Slices/CityApiSlice";
 import Select from "../../components/ui/Select";
 import { useGetServicesQuery } from "../../app/Api/Slices/ServiceApiSlice";
+import { useCreateConsultationRequestMutation } from "../../app/Api/Slices/ConsultationApiSlice";
+import { toast } from "react-toastify";
 
-const mockPatients: PatientRow[] = [
-  {
-    id: 2102,
-    patientName: "montaser gohar",
-    serviceType: "Tabib Doctor at Home",
-    status: "New Order",
-    date: "2025-11-11",
-    transactionStatus: "Successful",
-    paymentMethod: "-",
-    serviceProviderName: "-",
-    orderPrice: 0,
-  },
-  {
-    id: 2101,
-    patientName: "Ahmed",
-    serviceType: "Filler o Botics 1",
-    status: "New Order",
-    date: "2025-11-08",
-    transactionStatus: "-",
-    paymentMethod: "-",
-    serviceProviderName: "-",
-    orderPrice: 0,
-  },
-  {
-    id: 2100,
-    patientName: "Testing Demo 3",
-    serviceType: "-",
-    status: "New Order",
-    date: "2025-11-07",
-    transactionStatus: "-",
-    paymentMethod: "-",
-    serviceProviderName: "-",
-    orderPrice: 0,
-  },
-];
+
 
 export default function ConsultationRequests() {
   // لحد ما تربطها فعلياً بالـ query params هنحطها ثابتة
@@ -113,7 +80,7 @@ export default function ConsultationRequests() {
 
         {/* Table */}
         <div className="">
-          <PatientList rows={mockPatients} />
+          <PatientList />
         </div>
       </div>
 
@@ -133,6 +100,7 @@ const CreateAppointment = ({
   const { data } = useGetCityQuery({});
   const { data: servicea } = useGetServicesQuery({});
   const cities = data?.data || [];
+  const [createConsultationRequest] = useCreateConsultationRequestMutation({});
 
   const services = servicea?.data || [];
   console.log("data", services);
@@ -148,17 +116,28 @@ const CreateAppointment = ({
     resolver: zodResolver(consultationSchema),
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     const rawPhone = data.phone_number || "";
 
     const normalizedPhone = rawPhone.replace(/^\+/, "");
 
     const payload = {
       ...data,
-      phone_number: normalizedPhone, // ده اللي تبعته للباك
+      phone_number: normalizedPhone,
+      service_id: Number(data.service_id),
+      city_id: Number(data.city_id),
     };
-
     console.log("payload to backend:", payload);
+
+    try {
+      const response = await createConsultationRequest(payload).unwrap();
+      console.log("response", response);
+      reset();
+      setIsOpen(false);
+      toast.success(response.message);
+    } catch (error) {
+      console.error("Error creating consultation request:", error);
+    }
   };
 
   const handlePhoneChange = (value: string | undefined) => {
