@@ -1,0 +1,30 @@
+[1mdiff --git a/src/app/store.ts b/src/app/store.ts[m
+[1mindex 01e8082..c5b82a7 100644[m
+[1m--- a/src/app/store.ts[m
+[1m+++ b/src/app/store.ts[m
+[36m@@ -6,6 +6,7 @@[m [mimport { ServiceApiSlice } from "./Api/Slices/ServiceApiSlice";[m
+ import { ConsultationApiSlice } from "./Api/Slices/ConsultationApiSlice";[m
+ import { CountryApiSlice } from "./Api/Slices/CountryApiSlice";[m
+ import { partenersApiSlice } from "./Api/Slices/partenersApiSlice";[m
+[32m+[m[32mimport { BranchesApiSlice } from "./Api/Slices/BranchesApiSlice";[m
+ [m
+ export const store = configureStore({[m
+   reducer: {[m
+[36m@@ -15,6 +16,7 @@[m [mexport const store = configureStore({[m
+     [ConsultationApiSlice.reducerPath]: ConsultationApiSlice.reducer,[m
+     [CountryApiSlice.reducerPath]: CountryApiSlice.reducer,[m
+     [partenersApiSlice.reducerPath]: partenersApiSlice.reducer,[m
+[32m+[m[32m    [BranchesApiSlice.reducerPath]: BranchesApiSlice.reducer,[m
+   },[m
+   middleware: (getDefaultMiddleware) =>[m
+     getDefaultMiddleware({[m
+[36m@@ -25,7 +27,8 @@[m [mexport const store = configureStore({[m
+       ServiceApiSlice.middleware,[m
+       ConsultationApiSlice.middleware,[m
+       CountryApiSlice.middleware,[m
+[31m-      partenersApiSlice.middleware[m
+[32m+[m[32m      partenersApiSlice.middleware,[m
+[32m+[m[32m      BranchesApiSlice.middleware[m
+     ),[m
+ });[m
+ [m

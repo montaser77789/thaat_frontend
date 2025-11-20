@@ -73,21 +73,31 @@ export const sidebarSections: SidebarSection[] = [
         {
           type: "link",
           item: {
-            id: "teams",
-            label: "Teams",
-            href: "/admins/teams",
-            icon: FiUserCheck,
-          },
-        },
-        {
-          type: "link",
-          item: {
             id: "partners_link",
             label: "Partners",
             href: "/admins/partners",
             icon: FiUsers,
           },
         },
+        {
+          type: "link",
+          item: {
+            id: "branches_link",
+            label: "Branches",
+            href: "/admins/branches",
+            icon: FiUsers,
+          },
+        },
+        {
+          type: "link",
+          item: {
+            id: "teams",
+            label: "Teams",
+            href: "/admins/teams",
+            icon: FiUserCheck,
+          },
+        },
+
         {
           type: "link",
           item: {

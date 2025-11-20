@@ -13,6 +13,9 @@ import Partners from "../pages/partners";
 import AddNewPartener from "../pages/partners/addNewPartener";
 import SinglePartener from "../pages/partners/singlePartener";
 import EditPartener from "../pages/partners/editPartener";
+import Branches from "../pages/branches";
+import AddNewbranche from "../pages/branches/addNEwBranche";
+import SinglePranch from "../pages/branches/singlePranch";
 
 const token = Cookies.get("access_token");
 
@@ -68,6 +71,38 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <EditPartener />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="branches"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Branches />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="branches/new"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewbranche />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="branches/:id"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <SinglePranch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="branches/:id/edit"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewbranche />
               </ProtectedRoute>
             }
           />

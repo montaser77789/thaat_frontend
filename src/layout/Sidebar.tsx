@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
-let envLabel = "DEV";
+  let envLabel = "DEV";
   const { pathname: currentPath } = useLocation();
 
   const isActiveLink = (href: string) => currentPath === href;

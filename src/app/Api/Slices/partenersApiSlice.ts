@@ -55,7 +55,7 @@ export const partenersApiSlice = createApi({
         body: data,
       }),
       invalidatesTags: ["parteners"],
-    })
+    }),
   }),
 });
 
@@ -64,5 +64,5 @@ export const {
   useCreatePartenerMutation,
   useDeletePartnerMutation,
   useGetPartenerByIdQuery,
-  useUpdatePartenerMutation
+  useUpdatePartenerMutation,
 } = partenersApiSlice;
