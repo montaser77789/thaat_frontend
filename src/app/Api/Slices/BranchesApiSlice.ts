@@ -62,6 +62,10 @@ export const BranchesApiSlice = createApi({
         body: data,
       }),
       invalidatesTags: ["Branches"],
+    }),
+    gerBranchByPartner: builder.query({
+      query: (id) => `/api/medicalbranch/partner/${id}`,
+      providesTags: ["Branches"],
     })
   }),
 });
@@ -71,5 +75,6 @@ export const {
   useCreateBranchMutation,
   useDeleteBranchMutation,
   useGetBranchByIdQuery,
-  useUpdateBranchMutation
+  useUpdateBranchMutation,
+  useGerBranchByPartnerQuery
 } = BranchesApiSlice;

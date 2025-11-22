@@ -32,14 +32,9 @@ import {
   useUpdateBranchMutation,
 } from "../../../app/Api/Slices/BranchesApiSlice";
 import { toast } from "react-toastify";
+import { customStyles, type City, type OptionType ,type Partner } from "../../../types";
 
-// أنواع البيانات
-type Partner = {
-  id: number;
-  name: string;
-  contact_person_number?: string | null;
-  logo_url?: string | null;
-};
+
 
 type Service = {
   id: number;
@@ -48,10 +43,6 @@ type Service = {
   price?: string | null;
 };
 
-type City = {
-  id: number;
-  name: string;
-};
 
 type WorkingHours = {
   week_days: string[];
@@ -59,13 +50,6 @@ type WorkingHours = {
   end_time: string;
 };
 
-// نوع الخيار المستخدم في react-select
-type OptionType = {
-  value: string;
-  label: string;
-  partner?: Partner;
-  logo?: string | null;
-};
 
 type ServiceOptionType = {
   value: string;
@@ -116,10 +100,6 @@ type BranchResponse = {
   branchServices: BranchServiceType[];
 };
 
-const customStyles: StylesConfig<OptionType> = {
-  control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
-  option: (base) => ({ ...base, padding: 12 }),
-};
 
 const multiSelectStyles: StylesConfig<ServiceOptionType, true> = {
   control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
@@ -244,10 +224,11 @@ const AddNewBranch: React.FC = () => {
   const params = useParams();
   const idbranch = params.id;
   const isEditMode = Boolean(idbranch);
-  
-  const { data: branchResponse, isLoading: isLoadingSingle } = useGetBranchByIdQuery(idbranch, {
-    skip: !isEditMode,
-  });
+
+  const { data: branchResponse, isLoading: isLoadingSingle } =
+    useGetBranchByIdQuery(idbranch, {
+      skip: !isEditMode,
+    });
 
   const [updateBranch] = useUpdateBranchMutation();
   const [createBranch] = useCreateBranchMutation();
@@ -271,12 +252,14 @@ const AddNewBranch: React.FC = () => {
   console.log("errors", errors);
 
   // جلب البيانات من الـ APIs
-  const { data: partnersData, isLoading: partnersLoading } = useGetPartenersQuery({
-    page,
-    limit: perPage,
-  });
+  const { data: partnersData, isLoading: partnersLoading } =
+    useGetPartenersQuery({
+      page,
+      limit: perPage,
+    });
   const { data: citiesData, isLoading: citiesLoading } = useGetCityQuery({});
-  const { data: servicesData, isLoading: servicesLoading } = useGetServicesQuery({});
+  const { data: servicesData, isLoading: servicesLoading } =
+    useGetServicesQuery({});
 
   const partners: Partner[] = partnersData?.data || [];
   const cities: City[] = citiesData?.data || [];
@@ -285,13 +268,13 @@ const AddNewBranch: React.FC = () => {
   // تحويل البيانات إلى options
   const partnerOptions: OptionType[] = useMemo(
     () =>
-      partners.map((p) => ({
+      partners.map((p ) => ({
         value: String(p.id),
         label: p.name,
         partner: p,
         logo: p.logo_url ?? null,
       })),
-    [partners]
+    [partners ]
   );
 
   const cityOptions = useMemo(
@@ -317,7 +300,7 @@ const AddNewBranch: React.FC = () => {
   useEffect(() => {
     if (isEditMode && branchResponse?.data) {
       const branchData: BranchResponse = branchResponse.data;
-      
+
       const formData: BranchFormData = {
         name: branchData.name || "",
         name_locale: branchData.name_locale || "",
@@ -335,12 +318,14 @@ const AddNewBranch: React.FC = () => {
         phone: branchData.phone || "",
         mobile: branchData.mobile || "",
         email: branchData.email || "",
-        service_ids: branchData.branchServices?.map(bs => String(bs.service_id)) || [],
-        working_hours_per_day: branchData.working_hours_per_day?.map(wh => ({
-          week_days: [wh.day],
-          start_time: wh.start_time,
-          end_time: wh.end_time,
-        })) || [],
+        service_ids:
+          branchData.branchServices?.map((bs) => String(bs.service_id)) || [],
+        working_hours_per_day:
+          branchData.working_hours_per_day?.map((wh) => ({
+            week_days: [wh.day],
+            start_time: wh.start_time,
+            end_time: wh.end_time,
+          })) || [],
       };
 
       reset(formData);
@@ -449,10 +434,9 @@ const AddNewBranch: React.FC = () => {
           {isEditMode ? "Edit Branch" : "Add New Branch"}
         </h1>
         <p className="text-gray-600 mt-1">
-          {isEditMode 
-            ? "Update branch information and details" 
-            : "Create a new branch with the form below"
-          }
+          {isEditMode
+            ? "Update branch information and details"
+            : "Create a new branch with the form below"}
         </p>
       </div>
 
@@ -480,7 +464,8 @@ const AddNewBranch: React.FC = () => {
                       field.onChange(opt ? opt.value : "");
                     }}
                     value={
-                      partnerOptions.find((o) => o.value === field.value) ?? null
+                      partnerOptions.find((o) => o.value === field.value) ??
+                      null
                     }
                   />
                 )}
@@ -793,7 +778,8 @@ const AddNewBranch: React.FC = () => {
 
           {workingHours.length === 0 && (
             <p className="text-gray-500 text-center py-4">
-              No working hours added. Click "Add Working Hours" to add schedules.
+              No working hours added. Click "Add Working Hours" to add
+              schedules.
             </p>
           )}
         </div>
@@ -820,10 +806,13 @@ const AddNewBranch: React.FC = () => {
             isloading={isSubmitting}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
           >
-            {isSubmitting 
-              ? (isEditMode ? "Updating Branch..." : "Creating Branch...") 
-              : (isEditMode ? "Update Branch" : "Create Branch")
-            }
+            {isSubmitting
+              ? isEditMode
+                ? "Updating Branch..."
+                : "Creating Branch..."
+              : isEditMode
+              ? "Update Branch"
+              : "Create Branch"}
           </Button>
         </div>
       </form>

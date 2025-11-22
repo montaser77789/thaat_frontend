@@ -232,7 +232,7 @@ export default function Branches() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+              <tr className="bg-linear-to-r from-blue-600 to-blue-400 text-white">
                 <Th className="text-left">ID</Th>
                 <Th className="text-left">Branch Name (Eng)</Th>
                 <Th className="text-left">Branch Name (Ar)</Th>

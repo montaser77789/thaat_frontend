@@ -16,6 +16,10 @@ import EditPartener from "../pages/partners/editPartener";
 import Branches from "../pages/branches";
 import AddNewbranche from "../pages/branches/addNEwBranche";
 import SinglePranch from "../pages/branches/singlePranch";
+import SpecialistsPage from "../pages/specialists";
+import AddNewSpecialist from "../pages/specialists/addNewSpecialist";
+import EditSpecialist from "../pages/specialists/editSpecialist";
+import SingleSpecialist from "../pages/specialists/singleSpecialist";
 
 const token = Cookies.get("access_token");
 
@@ -103,6 +107,38 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <AddNewbranche />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialists"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <SpecialistsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialists/new"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewSpecialist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialists/:id/edit"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <EditSpecialist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialists/:id"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <SingleSpecialist />
               </ProtectedRoute>
             }
           />

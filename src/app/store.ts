@@ -7,6 +7,7 @@ import { ConsultationApiSlice } from "./Api/Slices/ConsultationApiSlice";
 import { CountryApiSlice } from "./Api/Slices/CountryApiSlice";
 import { partenersApiSlice } from "./Api/Slices/partenersApiSlice";
 import { BranchesApiSlice } from "./Api/Slices/BranchesApiSlice";
+import { specialistApiSlice } from "./Api/Slices/specialistApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [CountryApiSlice.reducerPath]: CountryApiSlice.reducer,
     [partenersApiSlice.reducerPath]: partenersApiSlice.reducer,
     [BranchesApiSlice.reducerPath]: BranchesApiSlice.reducer,
+    [specialistApiSlice.reducerPath]: specialistApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -28,7 +30,8 @@ export const store = configureStore({
       ConsultationApiSlice.middleware,
       CountryApiSlice.middleware,
       partenersApiSlice.middleware,
-      BranchesApiSlice.middleware
+      BranchesApiSlice.middleware,
+      specialistApiSlice.middleware
     ),
 });
 
