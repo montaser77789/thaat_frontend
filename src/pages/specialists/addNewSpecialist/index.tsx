@@ -36,7 +36,10 @@ import Select, {
   type SingleValueProps,
 } from "react-select";
 import { useGerBranchByPartnerQuery } from "../../../app/Api/Slices/BranchesApiSlice";
-import { getSpecialistSchema, type SpecialistFormData } from "../../../validation/specialist";
+import {
+  getSpecialistSchema,
+  type SpecialistFormData,
+} from "../../../validation/specialist";
 import Button from "../../../components/ui/Button";
 import { toast } from "react-toastify";
 import { useGetCityQuery } from "../../../app/Api/Slices/CityApiSlice";

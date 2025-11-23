@@ -55,6 +55,10 @@ export const specialistApiSlice = createApi({
       }),
       invalidatesTags: ["specialist"],
     }),
+    getSpecialistBybranchId: builder.query({
+      query: (id) => `/api/specialists/${id}/specialists`,
+      providesTags: ["specialist"],
+    })
   }),
 });
 
@@ -64,4 +68,5 @@ export const {
   useGetSpecialistsByIdQuery,
   useGetSpecialistsQuery,
   useDeleteSpecialistMutation,
+  useGetSpecialistBybranchIdQuery
 } = specialistApiSlice;

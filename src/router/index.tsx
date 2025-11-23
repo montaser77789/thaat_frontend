@@ -20,6 +20,9 @@ import SpecialistsPage from "../pages/specialists";
 import AddNewSpecialist from "../pages/specialists/addNewSpecialist";
 import EditSpecialist from "../pages/specialists/editSpecialist";
 import SingleSpecialist from "../pages/specialists/singleSpecialist";
+import TeamsPage from "../pages/Teams";
+import AddNewTeam from "../pages/Teams/addNewTeams";
+import SigleTeam from "../pages/Teams/singleTeam";
 
 const token = Cookies.get("access_token");
 
@@ -139,6 +142,39 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <SingleSpecialist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="teams"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <TeamsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="teams/new"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewTeam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="teams/:id/edit"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewTeam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="teams/:id"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <SigleTeam />
               </ProtectedRoute>
             }
           />

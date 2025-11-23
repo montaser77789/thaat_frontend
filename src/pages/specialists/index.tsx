@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useDeleteSpecialistMutation,
   useGetSpecialistsQuery,
@@ -9,7 +9,12 @@ import { FaEdit, FaEye, FaPlus, FaSearch, FaTrash } from "react-icons/fa";
 import Modal from "../../components/ui/Modal";
 import { toast } from "react-toastify";
 import { useGetPartenersQuery } from "../../app/Api/Slices/partenersApiSlice";
-import { customStyles, type OptionType } from "../../types";
+import {
+  customStyles,
+  type Branch,
+  type OptionType,
+  type Partner,
+} from "../../types";
 import Select, {
   components,
   type OptionProps,
@@ -18,6 +23,7 @@ import Select, {
 import { useGerBranchByPartnerQuery } from "../../app/Api/Slices/BranchesApiSlice";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { Td, Th } from "../../components/ui/Tables";
+import { formatDate } from "../../utils/formatDate";
 
 // أنواع البيانات
 type Specialist = {
@@ -42,18 +48,6 @@ type Specialist = {
     name: string;
   };
   created_at: string;
-};
-
-type Partner = {
-  id: number;
-  name: string;
-  logo_url?: string;
-};
-
-type Branch = {
-  id: number;
-  name: string;
-  logo_url?: string;
 };
 
 const SpecialistsPage = () => {
@@ -253,15 +247,6 @@ const SpecialistsPage = () => {
     logo: branch.logo_url ?? null,
   }));
 
-  // تنسيق التاريخ
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   return (
     <div>
       <div className="p-6 bg-gray-50 min-h-screen">
@@ -411,7 +396,7 @@ const SpecialistsPage = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+                <tr className="bg-linear-to-r from-blue-600 to-blue-400 text-white">
                   <Th className="text-left">ID</Th>
                   <Th className="text-left">Specialist</Th>
                   <Th className="text-left">Contact</Th>

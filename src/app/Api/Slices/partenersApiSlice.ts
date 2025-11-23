@@ -56,6 +56,10 @@ export const partenersApiSlice = createApi({
       }),
       invalidatesTags: ["parteners"],
     }),
+    getPartnersByCityId: builder.query({
+      query: (id) => `/api/parteners/city/${id}`,
+      providesTags: ["parteners"],
+    })
   }),
 });
 
@@ -65,4 +69,5 @@ export const {
   useDeletePartnerMutation,
   useGetPartenerByIdQuery,
   useUpdatePartenerMutation,
+  useGetPartnersByCityIdQuery
 } = partenersApiSlice;

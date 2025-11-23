@@ -50,4 +50,9 @@ export const customStyles: StylesConfig<OptionType> = {
   option: (base) => ({ ...base, padding: 12 }),
 };
 
+export type Branch = {
+  id: number;
+  name: string;
+  logo_url?: string;
+};
  
