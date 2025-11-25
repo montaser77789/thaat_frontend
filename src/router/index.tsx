@@ -23,6 +23,8 @@ import SingleSpecialist from "../pages/specialists/singleSpecialist";
 import TeamsPage from "../pages/Teams";
 import AddNewTeam from "../pages/Teams/addNewTeams";
 import SigleTeam from "../pages/Teams/singleTeam";
+import CaragoriesPage from "../pages/categories";
+import AddNewCatagory from "../pages/categories/addNewCatagory";
 
 const token = Cookies.get("access_token");
 
@@ -178,6 +180,32 @@ const router = createBrowserRouter(
               </ProtectedRoute>
             }
           />
+          <Route
+            path="categories"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <CaragoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="categories/new"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewCatagory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="categories/:id/edit"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewCatagory />
+              </ProtectedRoute>
+            }
+          />
+
+          
         </Route>
       </Route>
     </>

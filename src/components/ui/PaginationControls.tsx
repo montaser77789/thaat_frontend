@@ -21,13 +21,14 @@ export function PaginationControls({
   };
 
   return (
-    <div className="flex items-center justify-between mt-4 text-sm">
-      <div className="flex items-center gap-2">
-        <span>عدد العناصر في الصفحة:</span>
+    <div className="flex flex-col md:flex-row items-center justify-between mt-6 gap-4 text-sm">
+      {/* Per Page Selector */}
+      <div className="flex items-center gap-3">
+        <span className="font-medium text-gray-700">Items per page:</span>
         <select
-          className="w-[100px] border rounded-md px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={perPage}
           onChange={handlePerPageChange}
+          className="w-[110px] border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         >
           <option value={5}>5</option>
           <option value={10}>10</option>
@@ -36,22 +37,25 @@ export function PaginationControls({
         </select>
       </div>
 
+      {/* Page Info + Navigation */}
       <div className="flex items-center gap-4 text-gray-900">
-        <span>{`الصفحة ${currentPage} من ${totalPages}`}</span>
+        <span className="font-medium">{`Page ${currentPage} of ${totalPages}`}</span>
+
         <div className="flex gap-2">
           <button
-            className="border rounded-md px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
             disabled={currentPage <= 1}
             onClick={() => goToPage(currentPage - 1)}
+            className="border border-gray-300 rounded-lg px-4 py-1.5 text-sm font-medium bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
           >
-            السابق
+            Previous
           </button>
+
           <button
-            className="border rounded-md px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
             disabled={currentPage >= totalPages}
             onClick={() => goToPage(currentPage + 1)}
+            className="border border-gray-300 rounded-lg px-4 py-1.5 text-sm font-medium bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
           >
-            التالي
+            Next
           </button>
         </div>
       </div>

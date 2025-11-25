@@ -18,21 +18,19 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
-  let envLabel = "DEV";
   const { pathname: currentPath } = useLocation();
 
   const isActiveLink = (href: string) => currentPath === href;
 
-  const groupHasActiveChild = (group: SidebarGroup): boolean => {
-    return group.children.some((child) => {
-      if (child.type === "link") {
-        return isActiveLink(child.item.href);
-      }
-      return groupHasActiveChild(child.item);
-    });
-  };
+  const groupHasActiveChild = (group: SidebarGroup): boolean =>
+    group.children.some((child) =>
+      child.type === "link"
+        ? isActiveLink(child.item.href)
+        : groupHasActiveChild(child.item)
+    );
 
-  const renderLink = (link: SidebarLink, level: number = 0) => {
+  // 🔹 New Link Design
+  const renderLink = (link: SidebarLink, level = 0) => {
     const Icon = link.icon;
     const isActive = isActiveLink(link.href);
 
@@ -41,34 +39,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
         key={link.id}
         to={link.href}
         className={clsx(
-          "flex items-center rounded-lg text-sm transition-all duration-200",
-          "hover:bg-white hover:text-primary hover:shadow-md",
-          isActive
-            ? "bg-white text-primary shadow-md font-semibold"
-            : "text-white",
-          // padding تختلف حسب الـ isOpen
-          isOpen ? "p-3" : "p-2 justify-center",
-          // Indent للليفل الداخلي بس لما الـ sidebar مفتوح
-          level > 0 && isOpen && "ml-4"
+          "flex items-center rounded-xl text-sm transition-all duration-200",
+          "text-gray-700 hover:bg-gray-100 ",
+          isActive && "bg-primary text-white shadow-md",
+          isOpen ? "px-4 py-3" : "p-3 justify-center",
+          isOpen && level > 0 && "ml-4"
         )}
       >
         {Icon && (
           <Icon
-            className={clsx(
-              "w-5 h-5 shrink-0 transition-colors",
-              isActive ? "text-primary" : ""
-            )}
+            className={clsx("w-5 h-5 shrink-0", isActive && "text-white")}
           />
         )}
 
-        {/* النص يختفي لما الـ sidebar يكون مقفول */}
         {isOpen && (
-          <span
-            className={clsx(
-              "flex-1 whitespace-nowrap font-medium ml-3",
-              isActive ? "text-primary" : ""
-            )}
-          >
+          <span className="ml-3 whitespace-nowrap font-medium">
             {link.label}
           </span>
         )}
@@ -76,14 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
     );
   };
 
-  const renderChild = (child: SidebarChild, level: number = 0) => {
-    if (child.type === "link") {
-      return renderLink(child.item, level);
-    }
-    return renderGroup(child.item, level);
-  };
+  const renderChild = (child: SidebarChild, level = 0) =>
+    child.type === "link"
+      ? renderLink(child.item, level)
+      : renderGroup(child.item, level);
 
-  const renderGroup = (group: SidebarGroup, level: number = 0) => {
+  // 🔹 New Group Design
+  const renderGroup = (group: SidebarGroup, level = 0) => {
     const Icon = group.icon;
     const hasActiveChild = groupHasActiveChild(group);
 
@@ -98,49 +82,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
           <>
             <Disclosure.Button
               className={clsx(
-                "flex items-center w-full rounded-lg text-sm transition-all duration-200",
-                "hover:bg-white hover:text-primary hover:shadow-md",
-                hasActiveChild || open
-                  ? "bg-white text-primary shadow-md font-semibold"
-                  : "text-white",
-                isOpen ? "p-3" : "p-2 justify-center",
-                level > 0 && isOpen && "ml-4"
+                "flex items-center rounded-xl text-sm transition-all duration-200",
+                "text-gray-700 hover:bg-gray-100",
+                (open || hasActiveChild) && "bg-primary text-white shadow",
+                isOpen ? "px-4 py-3" : "p-3 justify-center",
+                isOpen && level > 0 && "ml-4"
               )}
             >
               {Icon && (
                 <Icon
                   className={clsx(
-                    "w-5 h-5 shrink-0 transition-colors",
-                    hasActiveChild || open ? "text-primary" : ""
+                    "w-5 h-5 shrink-0 text-gray-500",
+                    (open || hasActiveChild) && "text-white"
                   )}
                 />
               )}
 
-              {/* برضه نخبي النص لو مقفول */}
               {isOpen && (
-                <span
-                  className={clsx(
-                    "flex-1 whitespace-nowrap text-left ml-3 font-medium",
-                    hasActiveChild || open ? "text-primary" : ""
-                  )}
-                >
-                  {group.label}
-                </span>
+                <span className="ml-3 flex-1 font-medium">{group.label}</span>
               )}
 
-              {/* نخبي السهم لو الـ sidebar مقفول */}
               {isOpen && (
                 <ChevronDownIcon
                   className={clsx(
-                    "w-4 h-4 transition-transform duration-200 shrink-0",
-                    open ? "rotate-0" : "-rotate-90",
-                    hasActiveChild || open ? "text-primary" : "text-white"
+                    "w-4 h-4 transition-transform duration-200 text-gray-400",
+                    (open || hasActiveChild) && "text-white",
+                    open ? "rotate-0" : "-rotate-90"
                   )}
                 />
               )}
             </Disclosure.Button>
 
-            {/* في حالة الـ sidebar مقفول مش هنظهر الـ children أصلاً (اختياري) */}
             {isOpen && (
               <Disclosure.Panel as="div" className="space-y-1 mt-1">
                 {group.children.map((child) => (
@@ -156,46 +128,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, sidebarWidth }) => {
 
   const renderSection = (section: SidebarSection) =>
     section.type === "link"
-      ? renderLink(section.item, 0)
-      : renderGroup(section.item, 0);
+      ? renderLink(section.item)
+      : renderGroup(section.item);
 
   return (
     <aside
-      style={{ width: isOpen ? `${sidebarWidth}px` : "64px" }}
-      aria-label="Sidebar"
-      className={clsx(
-        "fixed top-0 left-0 z-40 h-screen min-h-full bg-primary",
-        "transition-all duration-300"
-      )}
+      style={{ width: isOpen ? `${sidebarWidth}px` : "70px" }}
+      className="fixed top-0 left-0 z-40 h-screen bg-white shadow-xl border-r border-gray-200 transition-all duration-300 flex flex-col"
     >
-      <div className="h-full px-3 py-4 overflow-y-auto">
+      <div className="flex flex-col h-full  space-y-6 overflow-y-auto">
         {/* Logo */}
-        <div className="flex w-full items-center justify-center mb-8">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img
-              src="https://staging.thaat.app/assets/whiteLogo-eefd060dff41d15046c83453df13759fc3c4c02e09c54a8304a0f08210a2113a.svg"
-              alt="Logo"
-              height={40}
-              width={40}
-            />
-          </Link>
+        <div
+          className={clsx(
+            "flex items-center justify-center bg-primary py-3",
+            isOpen ? "mb-4" : "mb-6"
+          )}
+        >
+          <img
+            src="https://staging.thaat.app/assets/whiteLogo-eefd060dff41d15046c83453df13759fc3c4c02e09c54a8304a0f08210a2113a.svg"
+            alt="Logo"
+            className={clsx(
+              "transition-all duration-300",
+              isOpen ? "w-10 h-10" : "w-8 h-8"
+            )}
+          />
         </div>
 
-        {/* Env badge – لو عايزها تختفي برضه لما يقفل */}
-        {isOpen && (
-          <div className="text-center mb-6 space-y-2">
-            {envLabel === "Staging" && (
-              <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
-                Staging Database
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Navigation Menu */}
+        {/* Navigation */}
         <nav className="space-y-2">
-          {sidebarSections.map((section) => (
-            <div key={section.item.id}>{renderSection(section)}</div>
+          {sidebarSections.map((s) => (
+            <div key={s.item.id}>{renderSection(s)}</div>
           ))}
         </nav>
       </div>

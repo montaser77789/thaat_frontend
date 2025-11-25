@@ -40,3 +40,11 @@ html , body {
   font-size: 1rem;
   background-color: transparent;
 }
+
+
+
+
+/* Active */
+.sidebar-item-active {
+  @apply bg-white text-primary shadow-md font-semibold;
+}

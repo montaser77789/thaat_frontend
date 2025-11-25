@@ -357,7 +357,7 @@ const AddNewTeam = () => {
               control={control}
               name="status"
               render={({ field }) => (
-                <Select
+                <Select<{ value: string; label: string }>
                   options={[
                     { value: "ACTIVE", label: "Active" },
                     { value: "INACTIVE", label: "Inactive" },
@@ -397,7 +397,7 @@ const AddNewTeam = () => {
               control={control}
               name="medical_branch_id"
               render={({ field }) => (
-                <Select
+                <Select<{ value: string; label: string }>
                   options={branchOptions}
                   isLoading={branchesLoading}
                   value={
