@@ -178,6 +178,15 @@ export const sidebarSections: SidebarSection[] = [
         {
           type: "link",
           item: {
+            id: "admin",
+            label: "Admins",
+            href: "/admins/admins",
+            icon: FiMapPin,
+          },
+        },
+        {
+          type: "link",
+          item: {
             id: "terms",
             label: "Terms & Conditions",
             href: "/admins/terms_and_conditions",

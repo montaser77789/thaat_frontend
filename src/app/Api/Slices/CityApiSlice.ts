@@ -22,7 +22,40 @@ export const CityApiSlice = createApi({
       query: () => "/api/settings/city",
       providesTags: ["City"],
     }),
+    createCity: builder.mutation({
+      query: (data) => ({
+        url: "/api/settings/city",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["City"],
+    }),
+    updateCity: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/settings/city/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["City"],
+    }),
+    deleteCity: builder.mutation({
+      query: (id) => ({
+        url: `/api/settings/city/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["City"],
+    }),
+    getCityById: builder.query({
+      query: (id) => `/api/settings/city/${id}`,
+      providesTags: ["City"],
+    }),
   }),
 });
 
-export const { useGetCityQuery } = CityApiSlice;
+export const {
+  useGetCityQuery,
+  useCreateCityMutation,
+  useUpdateCityMutation,
+  useDeleteCityMutation,
+  useGetCityByIdQuery,
+} = CityApiSlice;

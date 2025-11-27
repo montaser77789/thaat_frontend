@@ -26,7 +26,6 @@ export const ConsultationApiSlice = createApi({
       }),
       invalidatesTags: ["Consultation"],
     }),
-    // ConsultationApiSlice.ts
     getConsultationRequests: builder.query<
       any,
       { page: number; limit: number; search?: string }

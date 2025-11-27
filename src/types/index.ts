@@ -44,6 +44,20 @@ export type City = {
   id: number;
   name: string;
 };
+export interface Admin {
+  id: string;
+  first_name: string;
+  last_name: string;
+  mobile: string;
+  email: string;
+  gender: number; // 1 for male, 2 for female
+}
+export interface Country{
+  id: number;
+  name: string
+  code: string
+  
+}
 
 export const customStyles: StylesConfig<OptionType> = {
   control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
@@ -55,4 +69,3 @@ export type Branch = {
   name: string;
   logo_url?: string;
 };
- 

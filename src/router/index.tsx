@@ -25,6 +25,9 @@ import AddNewTeam from "../pages/Teams/addNewTeams";
 import SigleTeam from "../pages/Teams/singleTeam";
 import CaragoriesPage from "../pages/categories";
 import AddNewCatagory from "../pages/categories/addNewCatagory";
+import Cities from "../pages/cities";
+import Admins from "../pages/admins";
+import Countries from "../pages/countrie";
 
 const token = Cookies.get("access_token");
 
@@ -204,8 +207,30 @@ const router = createBrowserRouter(
               </ProtectedRoute>
             }
           />
-
-          
+          <Route
+            path="cities"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Cities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="countries"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Countries />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admins"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Admins />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Route>
     </>

@@ -10,6 +10,7 @@ import { BranchesApiSlice } from "./Api/Slices/BranchesApiSlice";
 import { specialistApiSlice } from "./Api/Slices/specialistApiSlice";
 import { TeamApiSlice } from "./Api/Slices/teamsApiSlice";
 import { catagoryApiSlice } from "./Api/Slices/catagoryApiSlice";
+import { AdminApiSlice } from "./Api/Slices/AdminApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     [specialistApiSlice.reducerPath]: specialistApiSlice.reducer,
     [TeamApiSlice.reducerPath]: TeamApiSlice.reducer,
     [catagoryApiSlice.reducerPath]: catagoryApiSlice.reducer,
+    [AdminApiSlice.reducerPath]: AdminApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -37,7 +39,8 @@ export const store = configureStore({
       BranchesApiSlice.middleware,
       specialistApiSlice.middleware,
       TeamApiSlice.middleware,
-      catagoryApiSlice.middleware
+      catagoryApiSlice.middleware,
+      AdminApiSlice.middleware
     ),
 });
 

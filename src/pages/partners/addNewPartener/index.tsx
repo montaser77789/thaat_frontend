@@ -27,7 +27,7 @@ import {
   FiDownload,
 } from "react-icons/fi";
 import { partenerSchema } from "../../../validation/partener";
-import { useGetCountryQuery } from "../../../app/Api/Slices/CountryApiSlice";
+import { useGetCountriesQuery } from "../../../app/Api/Slices/CountryApiSlice";
 import {
   useCreatePartenerMutation,
   useGetPartenerByIdQuery,
@@ -48,7 +48,7 @@ const AddNewPartener = () => {
   const [_, setPhoneValue] = useState<string>("");
 
   const { data: countriesData, isLoading: countriesLoading } =
-    useGetCountryQuery({});
+    useGetCountriesQuery({});
   const { data: citiesData, isLoading: citiesLoading } = useGetCityQuery({});
 
   const countries = countriesData?.data || [];

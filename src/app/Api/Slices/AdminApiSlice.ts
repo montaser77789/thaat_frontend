@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
-export const CountryApiSlice = createApi({
-  reducerPath: "CountryApiSlice",
-  tagTypes: ["country"],
+export const AdminApiSlice = createApi({
+  reducerPath: "adminApiSlice",
+  tagTypes: ["admin"],
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_PUBLIC_API_URL,
     prepareHeaders: (headers) => {
@@ -18,39 +18,44 @@ export const CountryApiSlice = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getCountries: builder.query({
-      query: () => "/api/settings/country",
-      providesTags: ["country"],
+    getadmin: builder.query({
+      query: () => "/api/settings/users",
+      providesTags: ["admin"],
     }),
-    createCountry: builder.mutation({
+    createadmin: builder.mutation({
       query: (data) => ({
-        url: "/api/settings/country",
+        url: "/api/settings/users/register",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["country"],
+      invalidatesTags: ["admin"],
     }),
-    updateCountry: builder.mutation({
+    updateadmin: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/api/settings/country/${id}`,
+        url: `/api/settings/users/${id}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["country"],
+      invalidatesTags: ["admin"],
     }),
-    deleteCountry: builder.mutation({
+    deleteadmin: builder.mutation({
       query: (id) => ({
-        url: `/api/settings/country/${id}`,
+        url: `/api/settings/users/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["country"],
+      invalidatesTags: ["admin"],
+    }),
+    getadminById: builder.query({
+      query: (id) => `/api/settings/users/${id}`,
+      providesTags: ["admin"],
     }),
   }),
 });
 
 export const {
-  useGetCountriesQuery,
-  useCreateCountryMutation,
-  useUpdateCountryMutation,
-  useDeleteCountryMutation,
-} = CountryApiSlice;
+  useGetadminQuery,
+  useCreateadminMutation,
+  useUpdateadminMutation,
+  useDeleteadminMutation,
+  useGetadminByIdQuery,
+} = AdminApiSlice;
