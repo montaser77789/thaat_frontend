@@ -4,10 +4,26 @@ export interface IAppointment {
   status: number;
   scheduled_at: string | null; // ISO Date string
   user_id: number | null;
+  age : number | null;
+  gender : number | null;
+  date_of_birth : string | null;
+  nationality_type : number | null;
+  nationality : string | null;
+  patment_method : number | null;
+  selling_cost : number | null;
+  service_provider_cost : number | null;
+  payment_link : string | null;
+  discount : number | null;
+  transaction_status : number | null;
+  payment_Date : string | null;
+  location_link : string | null;
+  provider_name : string | null;
+  longitude : number | null;
+  appointment_items: Record<string, any>[];
+  
 
   payment_details: Record<string, any>;
   reschedule_details: Record<string, any>;
-  patient_details: Record<string, any>;
 
   service_type: number;
 

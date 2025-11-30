@@ -25,6 +25,7 @@ const ViewAppointment = ({
   appointment: IAppointment;
   requestId?: string;
 }) => {
+  console.log("appointment", appointment);
   return (
     <div className="bg-white shadow-md rounded-xl p-6">
       <div className="flex justify-between items-center mb-6">
@@ -44,14 +45,11 @@ const ViewAppointment = ({
         {/* العمود الأول */}
         <div>
           <Field label="Order Number#" value={appointment?.id} />
-          <Field
-            label="National ID#"
-            value={appointment?.patient_details?.national_id}
-          />
-          <Field label="Age" value={appointment?.patient_details?.age} />
+          <Field label="National #" value={appointment?.nationality} />
+          <Field label="Age" value={appointment?.age} />
           <Field
             label="Date of Birth"
-            value={appointment?.patient_details?.dob}
+            value={appointment?.date_of_birth}
           />
           <Field
             label="Refund Slip"
@@ -59,9 +57,9 @@ const ViewAppointment = ({
           />
           <Field
             label="Arrival Time"
-            value={appointment?.patient_details?.arrival_time}
+            value={appointment?.payment_details?.arrival_time}
           />
-          <Field label="Payment Date" value={appointment?.purchased_date} />
+          <Field label="Payment Date" value={appointment?.payment_Date} />
           <Field
             label="Discount"
             value={appointment?.payment_details?.discount}
@@ -76,17 +74,17 @@ const ViewAppointment = ({
         <div>
           <Field
             label="Nationality"
-            value={appointment?.patient_details?.nationality}
+            value={appointment?.nationality}
           />
-          <Field label="Gender" value={appointment?.patient_details?.gender} />
-          <Field
+          <Field label="Gender" value={appointment?.gender} />
+          {/* <Field
             label="Customer Service Date"
-            value={appointment?.patient_details?.service_date}
+            value={appointment?.service_date}
           />
           <Field
             label="Service Time"
-            value={appointment?.patient_details?.service_time}
-          />
+            value={appointment?.service_time}
+          /> */}
           <Field
             label="Bank Transfer Document"
             value={appointment?.payment_details?.bank_transfer_doc}
@@ -95,22 +93,22 @@ const ViewAppointment = ({
             label="Payment Method"
             value={appointment?.payment_details?.method}
           />
-          <Field label="Items" value={0} />
-          <Field
+          <Field label="Items" value={appointment?.appointment_items.length} />
+          {/* <Field
             label="Latitude"
-            value={appointment?.patient_details?.latitude}
-          />
+            value={appointment?.latitude}
+          /> */}
         </div>
 
         {/* العمود الثالث */}
         <div>
           <Field
             label="Service Provider Cost"
-            value={appointment?.offer_price}
+            value={appointment?.service_provider_cost}
           />
           <Field
             label="Service Price"
-            value={appointment?.offer_official_price}
+            value={appointment?.service_provider_cost}
           />
           <Field
             label="Service Provider Cost (VAT)"
@@ -122,19 +120,19 @@ const ViewAppointment = ({
           />
           <Field
             label="Location Link"
-            value={appointment?.patient_details?.location_link}
+            value={appointment?.location_link}
           />
           <Field
             label="Service Provider Name"
-            value={appointment?.patient_details?.provider_name}
+            value={appointment?.provider_name}
           />
           <Field
             label="Payment Link"
-            value={appointment?.payment_details?.payment_link}
+            value={appointment?.payment_link}
           />
           <Field
             label="Longitude"
-            value={appointment?.patient_details?.longitude}
+            value={appointment?.longitude}
           />
         </div>
       </div>

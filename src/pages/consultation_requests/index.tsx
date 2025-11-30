@@ -144,8 +144,8 @@ const CreateAppointment = ({
         </div>
 
         <Select
-          label="Service"
-          placeholder="Select Service"
+          label="catagory"
+          placeholder="Select catagory"
           {...register("catagory_id")}
           error={!!errors.catagory_id}
           helperText={errors.catagory_id?.message}

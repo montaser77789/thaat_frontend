@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetPartenersQuery } from "../../../../app/Api/Slices/partenersApiSlice";
 import { useGerBranchByPartnerQuery } from "../../../../app/Api/Slices/BranchesApiSlice";
@@ -21,13 +21,20 @@ import Input from "../../../../components/ui/Input";
 import { FiUser, FiTrash2 } from "react-icons/fi";
 import { useGetConsultationRequestByIdQuery } from "../../../../app/Api/Slices/ConsultationApiSlice";
 import { useGetServicesByCatagoryQuery } from "../../../../app/Api/Slices/ServiceApiSlice";
+import {
+  useEditAppointmentMutation,
+  useGetAppointmentByIdQuery,
+} from "../../../../app/Api/Slices/appointmentApiSlice";
+import { toast } from "react-toastify";
 
 // تعريف الـ types الجديدة
 interface ServiceOption {
+  id: string;
   value: string;
   label: string;
   cost?: number;
   price?: number;
+  quantity?: number;
 }
 
 interface AppointmentItem {
@@ -44,7 +51,7 @@ interface ExtendedAppointmentFormData extends createAppointmentSchemaFormData {
 }
 
 const defaultSpecialistValues = {
-  partenerId: "",
+  partener_id: "",
   specialist_id: "",
   request_id: "",
   branch_id: "",
@@ -86,7 +93,10 @@ const EditAppoientment = () => {
   const [selectedService, setSelectedService] = useState<ServiceOption | null>(
     null
   );
+  console.log("selectedService", selectedService);
   const [serviceQuantity, setServiceQuantity] = useState<number>(1);
+  const [editAppointment, { isLoading: isEditLoading }] =
+    useEditAppointmentMutation();
 
   const { data: consultation } = useGetConsultationRequestByIdQuery(request_id);
   const catagoryId = consultation?.data?.catagory_id;
@@ -119,7 +129,7 @@ const EditAppoientment = () => {
     name: "items",
   });
 
-  const partenerId = watch("partenerId");
+  const partener_id = watch("partener_id");
   const medical_branch_id = watch("branch_id");
   const specialist_id = watch("specialist_id");
 
@@ -130,8 +140,8 @@ const EditAppoientment = () => {
     });
 
   const { data: branchesData, isLoading: branchesLoading } =
-    useGerBranchByPartnerQuery(partenerId ? Number(partenerId) : 0, {
-      skip: !partenerId,
+    useGerBranchByPartnerQuery(partener_id ? Number(partener_id) : 0, {
+      skip: !partener_id,
     });
 
   const { data: specialistsData, isLoading: specialistsLoading } =
@@ -139,6 +149,44 @@ const EditAppoientment = () => {
       medical_branch_id ? Number(medical_branch_id) : 0,
       { skip: !medical_branch_id }
     );
+  const { data: appointmentData } = useGetAppointmentByIdQuery(idAppointment);
+  useEffect(() => {
+    if (isEditMode && appointmentData) {
+      const team = appointmentData.data || appointmentData;
+      console.log("appointmentData", team.branch_id);
+      const toStringOrEmpty = (value: string | number) =>
+        value ? String(value) : "";
+
+      reset({
+        partener_id: toStringOrEmpty(team.partener_id),
+        branch_id: toStringOrEmpty(team.branch_id),
+        specialist_id: toStringOrEmpty(team.specialist_id),
+        scheduled_at: toStringOrEmpty(team.scheduled_at),
+        identifier: toStringOrEmpty(team.identifier),
+        age: toStringOrEmpty(team.age),
+        gender: toStringOrEmpty(team.gender),
+        date_of_birth: toStringOrEmpty(team.date_of_birth),
+        nationality_type: toStringOrEmpty(team.nationality_type),
+        nationality: toStringOrEmpty(team.nationality),
+        patment_method: toStringOrEmpty(team.patment_method),
+        selling_cost: toStringOrEmpty(team.selling_cost),
+        service_provider_cost: toStringOrEmpty(team.service_provider_cost),
+        discount: toStringOrEmpty(team.discount),
+        payment_link: toStringOrEmpty(team.payment_link),
+        transaction_status: toStringOrEmpty(team.transaction_status),
+        payment_Date: toStringOrEmpty(team.payment_Date),
+
+        items: team?.appointment_items?.map((item: any) => ({
+          id: item.id,
+          service_id: String(item.service_id),
+          custom_name: item.custom_name,
+          custom_cost: item.custom_cost,
+          custom_price: item.custom_price,
+          quantity: item.quantity,
+        })),
+      });
+    }
+  }, [isEditMode, appointmentData, reset]);
 
   const partners = partnersData?.data || [];
   const branches = branchesData?.data || [];
@@ -176,6 +224,7 @@ const EditAppoientment = () => {
   const serviceOptions: ServiceOption[] = useMemo(
     () =>
       (services?.data || []).map((service: any) => ({
+        id: service.id,
         value: String(service.id),
         label: service.name,
         cost: service.cost,
@@ -252,19 +301,37 @@ const EditAppoientment = () => {
     }, 0);
   };
 
-  const handleFormSubmit = (data: ExtendedAppointmentFormData) => {
-    console.log("Data to send to backend:", {
-      partener_id: Number(data.partenerId),
-      specialist_id: Number(data.specialist_id),
-      request_id: Number(data.request_id),
-      branch_id: Number(data.branch_id),
-      items: data.items,
-    });
+  const handleFormSubmit = async (data: ExtendedAppointmentFormData) => {
+    // Normalize fields → convert numeric strings to numbers
+    const itemsToSend = fields.map((item) => ({
+      id: item.id,
+      service_id: item.service_id ? Number(item.service_id) : null,
+      custom_name: item.custom_name ?? null,
+      custom_cost: item.custom_cost ? Number(item.custom_cost) : null,
+      custom_price: item.custom_price ? Number(item.custom_price) : null,
+      quantity: Number(item.quantity) || 1,
+    }));
 
-    setValue("partenerId", data.partenerId);
-    setValue("specialist_id", data.specialist_id);
-    setValue("request_id", data.request_id);
-    setValue("branch_id", data.branch_id);
+    console.log("itemsToSend", itemsToSend);
+
+    const payload = {
+      ...data,
+      items: itemsToSend,
+    };
+    try {
+      if (isEditMode) {
+        const response = await editAppointment({
+          id: idAppointment,
+          data: payload,
+        }).unwrap();
+        console.log("response", response);
+        toast.success(response.message);
+      }
+    } catch (error) {
+      console.error("Error creating consultation request:", error);
+    }
+
+    console.log("payload", payload);
   };
 
   return (
@@ -287,13 +354,13 @@ const EditAppoientment = () => {
           <div>
             <label className="font-bold text-gray-700 block mb-1">
               Select Partner *
-              {partenerId && branchesLoading && (
+              {partener_id && branchesLoading && (
                 <span className="text-sm text-blue-600 ml-2">(Loading...)</span>
               )}
             </label>
             <Controller
               control={control}
-              name="partenerId"
+              name="partener_id"
               render={({ field }) => (
                 <PartnerSelect
                   options={partnerOptions}
@@ -310,9 +377,9 @@ const EditAppoientment = () => {
                 />
               )}
             />
-            {errors.partenerId && (
+            {errors.partener_id && (
               <p className="text-sm text-red-600 mt-1">
-                {errors.partenerId.message}
+                {errors.partener_id.message}
               </p>
             )}
           </div>
@@ -332,7 +399,7 @@ const EditAppoientment = () => {
               control={control}
               name="branch_id"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={branchOptions}
                   isLoading={branchesLoading}
                   value={
@@ -344,14 +411,14 @@ const EditAppoientment = () => {
                     handleBranchChange(value);
                   }}
                   placeholder={
-                    !partenerId
+                    !partener_id
                       ? "Please select a partner first"
                       : "Select medical branch"
                   }
                   styles={customStyles}
-                  isDisabled={!partenerId || branchesLoading}
+                  isDisabled={!partener_id || branchesLoading}
                   noOptionsMessage={() =>
-                    !partenerId
+                    !partener_id
                       ? "Please select a partner first"
                       : "No branches found"
                   }
@@ -376,7 +443,7 @@ const EditAppoientment = () => {
               control={control}
               name="specialist_id"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={specialistOptions}
                   isLoading={specialistsLoading}
                   value={
@@ -413,6 +480,7 @@ const EditAppoientment = () => {
           <Input
             label="Customer Service Date"
             placeholder="YYYY-MM-DD"
+            type="date"
             {...register("scheduled_at")}
             error={!!errors.scheduled_at}
             helperText={errors.scheduled_at?.message}
@@ -430,7 +498,6 @@ const EditAppoientment = () => {
             label="Age"
             placeholder="Enter age"
             {...register("age")}
-            type="number"
             error={!!errors.age}
             helperText={errors.age?.message}
           />
@@ -444,7 +511,7 @@ const EditAppoientment = () => {
               control={control}
               name="gender"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={genderOptions}
                   value={
                     genderOptions.find((o) => o.value === field.value) ?? null
@@ -480,7 +547,7 @@ const EditAppoientment = () => {
               control={control}
               name="nationality_type"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={nationalityTypeOptions}
                   value={
                     nationalityTypeOptions.find(
@@ -517,7 +584,7 @@ const EditAppoientment = () => {
               control={control}
               name="patment_method"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={paymentMethodOptions}
                   value={
                     paymentMethodOptions.find((o) => o.value === field.value) ??
@@ -577,7 +644,7 @@ const EditAppoientment = () => {
               control={control}
               name="transaction_status"
               render={({ field }) => (
-                <Select<{value : string, label : string}>
+                <Select<{ value: string; label: string }>
                   options={transactionStatusOptions}
                   value={
                     transactionStatusOptions.find(
@@ -626,7 +693,6 @@ const EditAppoientment = () => {
                   value={selectedService}
                   onChange={setSelectedService}
                   placeholder="Select service"
-                  styles={customStyles}
                 />
               </div>
 
@@ -636,7 +702,6 @@ const EditAppoientment = () => {
                 </label>
                 <div className="flex items-center gap-2">
                   <input
-                    type="number"
                     min="1"
                     value={serviceQuantity}
                     onChange={(e) => setServiceQuantity(Number(e.target.value))}
@@ -677,7 +742,6 @@ const EditAppoientment = () => {
                   Item Cost
                 </label>
                 <input
-                  type="number"
                   placeholder="Cost"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   id="customItemCost"
@@ -689,7 +753,6 @@ const EditAppoientment = () => {
                   Item Price
                 </label>
                 <input
-                  type="number"
                   placeholder="Price"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   id="customItemPrice"
@@ -784,7 +847,6 @@ const EditAppoientment = () => {
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <input
-                              type="number"
                               disabled
                               min="1"
                               defaultValue={quantity}

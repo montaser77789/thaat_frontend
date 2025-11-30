@@ -16,11 +16,21 @@ export const appointmentApiSlice = createApi({
       headers.set("Accept", "application/json");
       return headers;
     },
-
   }),
   endpoints: (builder) => ({
-
+    editAppointment: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/appointments/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["appointment"],
+    }),
+    getAppointmentById: builder.query({
+      query: (id) => `/api/appointments/${id}`,
+      providesTags: ["appointment"],
+    })
   }),
 });
 
-export const {} = appointmentApiSlice;
+export const { useEditAppointmentMutation ,useGetAppointmentByIdQuery } = appointmentApiSlice;

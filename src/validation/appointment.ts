@@ -3,7 +3,7 @@ import z from "zod";
 
 // Schema للإنشاء (جميع الحقول مطلوبة)
 const createAppointmentSchema = z.object({
-  partenerId: z.string().min(1, "Partner is required"),
+  partener_id: z.string().min(1, "Partner is required"),
   specialist_id: z.string().min(1, "Specialist is required"),
   request_id: z.string().min(1, "Request is required"),
   branch_id: z.string().min(1, "Branch is required"),
@@ -25,10 +25,10 @@ const createAppointmentSchema = z.object({
 
 // Schema للتعديل (الحقول الاختيارية)
 const updateAppointmentSchema = z.object({
-  partenerId: z.string().optional(),
-  specialist_id:z.string().optional(),
-  request_id: z.string().optional(),
-  branch_id: z.string().optional(),
+  partener_id: z.string().min(1, "Partner is required"),
+  specialist_id: z.string().min(1, "Specialist is required"),
+  request_id: z.string().min(1, "Request is required"),
+  branch_id: z.string().min(1, "Branch is required"),
   scheduled_at: z.string().optional(),
   identifier: z.string().optional(),
   age : z.string().optional(),
