@@ -60,6 +60,9 @@ export const catagoryApiSlice = createApi({
       }),
       invalidatesTags: ["catagory"],
     }),
+    getCatagores: builder.query({
+      query: () => "/api/catagories/all",
+    })
   }),
 });
 
@@ -69,4 +72,5 @@ export const {
   useGetCatagoryByIdQuery,
   useGetAllCatagoryQuery,
   useDeleteCatagoryMutation,
+  useGetCatagoresQuery
 } = catagoryApiSlice;

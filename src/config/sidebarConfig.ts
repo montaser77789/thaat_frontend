@@ -142,6 +142,15 @@ export const sidebarSections: SidebarSection[] = [
         {
           type: "link",
           item: {
+            id: "services",
+            label: "Services",
+            href: "/admins/services",
+            icon: FiFileText,
+          },
+        },
+        {
+          type: "link",
+          item: {
             id: "flags",
             label: "Flags",
             href: "/admins/flags",

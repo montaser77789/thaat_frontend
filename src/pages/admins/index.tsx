@@ -146,7 +146,7 @@ const Admins = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+              <tr className="bg-linear-to-r from-blue-600 to-blue-400 text-white">
                 <Th className="text-left">ID</Th>
                 <Th className="text-left">Name</Th>
                 <Th className="text-left">Mobile</Th>

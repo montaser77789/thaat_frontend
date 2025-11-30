@@ -63,8 +63,8 @@ const formatDate = (dateString: string) => {
 function mapConsultationToRow(item: ConsultationRequest): PatientRow {
   return {
     id: item.id,
-    patientName: item.name,
-    serviceType: item.service.name || "-",
+    patientName: item?.name,
+    serviceType: item?.service?.name || "-",
     status: mapStatus(item.status),
     date: formatDate(item.created_at),
     transactionStatus: (item.payment_status as TransactionStatus) || "-",
@@ -105,7 +105,8 @@ export default function PatientList() {
 
   // ================== Filters state ==================
   const [patientStatusFilter, setPatientStatusFilter] = useState<string>("");
-  const [transactionStatusFilter, setTransactionStatusFilter] = useState<string>("");
+  const [transactionStatusFilter, setTransactionStatusFilter] =
+    useState<string>("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>("");
   const [partnerFilter, setPartnerFilter] = useState<string>("");
   const [createdFrom, setCreatedFrom] = useState<string>("");
@@ -177,9 +178,7 @@ export default function PatientList() {
 
     switch (action) {
       case "View Details":
-        navigate(
-          `/admins/consultation_requests?payment_status_in=1&patient_id=${id}`
-        );
+        navigate(`/admins/consultation_requests/appointment/${id}`);
         break;
       default:
         break;
@@ -196,10 +195,6 @@ export default function PatientList() {
             Medical appointments and patient management
           </p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-md mt-4 md:mt-0">
-          <FiPlus className="mr-2" />
-          Add New Patient
-        </button>
       </div>
 
       {/* Filters and search */}
@@ -322,7 +317,7 @@ export default function PatientList() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+              <tr className="bg-linear-to-r from-blue-600 to-blue-400 text-white">
                 <Th className="text-left">ID</Th>
                 <Th className="text-left">Patient Name</Th>
                 <Th className="text-left">Service Type</Th>
@@ -411,11 +406,11 @@ export default function PatientList() {
                     <Td className="text-center text-gray-600">
                       {row.paymentMethod}
                     </Td>
-                    
+
                     <Td className="text-center text-gray-600">
                       {row.serviceProviderName}
                     </Td>
-                    
+
                     <Td className="text-center font-bold text-green-600">
                       ${row.orderPrice.toLocaleString()}
                     </Td>
@@ -451,7 +446,9 @@ export default function PatientList() {
                   <Td colSpan={10} className="text-center py-8 text-gray-500">
                     <div className="flex flex-col items-center">
                       <div className="text-4xl mb-2">📋</div>
-                      <p className="text-lg font-semibold">No Patient Data Available</p>
+                      <p className="text-lg font-semibold">
+                        No Patient Data Available
+                      </p>
                       <p className="text-sm text-gray-400 mt-1">
                         No patient records found matching your criteria
                       </p>
@@ -466,11 +463,10 @@ export default function PatientList() {
         {/* Table footer with pagination */}
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-gray-700 mb-2 md:mb-0">
-            Showing{" "}
-            <span className="font-medium">{rows.length}</span> of{" "}
+            Showing <span className="font-medium">{rows.length}</span> of{" "}
             <span className="font-medium">{pagination.total}</span> patients
           </div>
-          
+
           <PaginationControls
             currentPage={page}
             totalPages={totalPages}

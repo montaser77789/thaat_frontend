@@ -36,10 +36,15 @@ export const ConsultationApiSlice = createApi({
       }),
       providesTags: ["Consultation"],
     }),
+    getConsultationRequestById: builder.query({
+      query: (id) => `/api/consultation-requests/${id}`,
+      providesTags: ["Consultation"],
+    }),
   }),
 });
 
 export const {
   useCreateConsultationRequestMutation,
   useGetConsultationRequestsQuery,
+  useGetConsultationRequestByIdQuery,
 } = ConsultationApiSlice;

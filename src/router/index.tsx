@@ -28,6 +28,10 @@ import AddNewCatagory from "../pages/categories/addNewCatagory";
 import Cities from "../pages/cities";
 import Admins from "../pages/admins";
 import Countries from "../pages/countrie";
+import Services from "../pages/services";
+import AddNewSercice from "../pages/services/addNewServices";
+import Appointment from "../pages/consultation_requests/appointment";
+import EditAppoientment from "../pages/consultation_requests/appointment/editAppoinentment";
 
 const token = Cookies.get("access_token");
 
@@ -51,6 +55,22 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <ConsultationRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="consultation_requests/appointment/:cosultationRequestId"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Appointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="consultation_requests/appointments/edit/:appointmentId/:requestId"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <EditAppoientment />
               </ProtectedRoute>
             }
           />
@@ -228,6 +248,30 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <Admins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="services"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="services/new"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewSercice />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="services/:id/edit"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AddNewSercice />
               </ProtectedRoute>
             }
           />

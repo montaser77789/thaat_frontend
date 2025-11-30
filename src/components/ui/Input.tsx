@@ -29,7 +29,7 @@ const Input = forwardRef<HTMLInputElement, IProps>(
             placeholder={rest.placeholder}
             className={`border ${
               error ? "border-red-500" : "border-gray-300"
-            } shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary rounded-lg px-3 py-2.5 text-md w-full bg-transparent ${
+            } shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary rounded-lg px-3 py-2 text-md w-full bg-transparent ${
               icon ? "pl-10" : ""
             } ${rest.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
             {...rest}

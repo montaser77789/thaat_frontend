@@ -60,8 +60,8 @@ export interface Country{
 }
 
 export const customStyles: StylesConfig<OptionType> = {
-  control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
-  option: (base) => ({ ...base, padding: 12 }),
+  control: (base) => ({ ...base, minHeight: 42, padding: 1, borderRadius: 6 }),
+  option: (base) => ({ ...base, padding: 5 }),
 };
 
 export type Branch = {

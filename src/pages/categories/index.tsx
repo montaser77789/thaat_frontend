@@ -10,7 +10,7 @@ import { PaginationControls } from "../../components/ui/PaginationControls";
 import { Td, Th } from "../../components/ui/Tables";
 import { toast } from "react-toastify";
 
-interface Catagory {
+export interface Catagory {
   id: number;
   name_ar: string;
   name_en: string;

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import PatientList from "../../components/consultation_requests/PatientList";
 import Button from "../../components/ui/Button";
 import { FiPlus } from "react-icons/fi";
@@ -17,74 +16,29 @@ import "react-phone-number-input/style.css";
 import { consultationSchema } from "../../validation/consultation";
 import { useGetCityQuery } from "../../app/Api/Slices/CityApiSlice";
 import Select from "../../components/ui/Select";
-import { useGetServicesQuery } from "../../app/Api/Slices/ServiceApiSlice";
 import { useCreateConsultationRequestMutation } from "../../app/Api/Slices/ConsultationApiSlice";
 import { toast } from "react-toastify";
-
-
+import { useGetCatagoresQuery } from "../../app/Api/Slices/catagoryApiSlice";
 
 export default function ConsultationRequests() {
-  // لحد ما تربطها فعلياً بالـ query params هنحطها ثابتة
   const [isOpen, setIsOpen] = useState(false);
   console.log(isOpen);
-
-  const dateLabel = new Date().toLocaleDateString();
 
   return (
     <div className="  ">
       <div className=" mx-auto px-4 space-y-8">
-        <div className="flex items-center gap-3">
-          <Link to="/admins/consultation_requests">
-            <button className="inline-flex items-center justify-center rounded-lg bg-black p-2 hover:bg-gray-900 transition">
-              <svg
-                width="30"
-                height="32"
-                viewBox="0 0 30 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect width="30" height="32" rx="4" fill="black" />
-                <path
-                  d="M12.975 10.9414L7.91663 15.9997L12.975 21.0581"
-                  stroke="white"
-                  strokeWidth="1.25"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M22.0834 16H8.05835"
-                  stroke="white"
-                  strokeWidth="1.25"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </Link>
-
-          <h2 className="text-gray-900 sm:tracking-tight">
-            <span className="block text-xl md:text-2xl font-semibold">
-              Daily Transaction Report:
-            </span>
-            <span className="inline-flex items-center rounded-lg bg-blue-100 text-blue-900 text-sm md:text-base font-normal px-3 py-1 mt-2">
-              {dateLabel}
-            </span>
-          </h2>
-          <Button onClick={() => setIsOpen(true)} className="ml-auto">
-            <FiPlus className="mr-2" />
-            Create Appointment
-          </Button>
-        </div>
-
         {/* Table */}
         <div className="">
+          <div className="flex items-center gap-3">
+            <Button onClick={() => setIsOpen(true)} className="ml-auto">
+              <FiPlus className="mr-2" />
+              Create Appointment
+            </Button>
+          </div>
           <PatientList />
         </div>
+        <CreateAppointment isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
-
-      <CreateAppointment isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }
@@ -98,12 +52,12 @@ const CreateAppointment = ({
 }) => {
   const [phoneValue, setPhoneValue] = useState<string>("");
   const { data } = useGetCityQuery({});
-  const { data: servicea } = useGetServicesQuery({});
+  const { data: catagory } = useGetCatagoresQuery({});
   const cities = data?.data || [];
   const [createConsultationRequest] = useCreateConsultationRequestMutation({});
 
-  const services = servicea?.data || [];
-  console.log("data", services);
+  const catagoryes = catagory?.data || [];
+  console.log("data", catagory);
 
   const {
     register,
@@ -192,12 +146,12 @@ const CreateAppointment = ({
         <Select
           label="Service"
           placeholder="Select Service"
-          {...register("service_id")}
-          error={!!errors.service_id}
-          helperText={errors.service_id?.message}
-          options={services.map((city: any) => ({
+          {...register("catagory_id")}
+          error={!!errors.catagory_id}
+          helperText={errors.catagory_id?.message}
+          options={catagoryes?.map((city: any) => ({
             value: city.id,
-            label: city.name,
+            label: city.name_en,
           }))}
         />
 

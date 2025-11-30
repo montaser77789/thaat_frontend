@@ -19,10 +19,49 @@ export const ServiceApiSlice = createApi({
   }),
   endpoints: (builder) => ({
     getServices: builder.query({
-      query: () => "/api/services",
+      query: () => "/api/settings/services",
+      providesTags: ["Service"],
+    }),
+    getServiceById: builder.query({
+      query: (id) => `/api/settings/services/${id}`,
+      providesTags: ["Service"],
+    }),
+    createService: builder.mutation({
+      query: (data) => ({
+        url: "/api/settings/services",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Service"],
+    }),
+    updateService: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/settings/services/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Service"],
+    }),
+    deleteService: builder.mutation({
+      query: (id) => ({
+        url: `/api/settings/services/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Service"],
+    }),
+    getServicesByCatagory: builder.query({
+      query: ({ catagory_id, city_id }) =>
+        `/api/settings/services/catagory/${catagory_id}/city/${city_id}`,
       providesTags: ["Service"],
     }),
   }),
 });
 
-export const { useGetServicesQuery } = ServiceApiSlice;
+export const {
+  useGetServicesQuery,
+  useGetServiceByIdQuery,
+  useCreateServiceMutation,
+  useUpdateServiceMutation,
+  useDeleteServiceMutation,
+  useGetServicesByCatagoryQuery,
+} = ServiceApiSlice;

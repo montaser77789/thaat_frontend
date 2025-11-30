@@ -263,7 +263,7 @@ const AddNewBranch: React.FC = () => {
 
   const partners: Partner[] = partnersData?.data || [];
   const cities: City[] = citiesData?.data || [];
-  const services: Service[] = servicesData?.data || [];
+  const services: Service[] = servicesData?.data.services || [];
 
   // تحويل البيانات إلى options
   const partnerOptions: OptionType[] = useMemo(
