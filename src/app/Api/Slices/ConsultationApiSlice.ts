@@ -40,6 +40,13 @@ export const ConsultationApiSlice = createApi({
       query: (id) => `/api/consultation-requests/${id}`,
       providesTags: ["Consultation"],
     }),
+    sendWhatsappMessage: builder.mutation({
+      query: ({ id, type }) => ({
+        url: `/api/consultation-requests/${id}/send-template`,
+        method: "PATCH",
+        body: { type },
+      }),
+    }),
   }),
 });
 
@@ -47,4 +54,5 @@ export const {
   useCreateConsultationRequestMutation,
   useGetConsultationRequestsQuery,
   useGetConsultationRequestByIdQuery,
+  useSendWhatsappMessageMutation,
 } = ConsultationApiSlice;

@@ -142,7 +142,7 @@ const AddNewPartener = () => {
 
       const result = await createPartener(formData).unwrap();
 
-      toast.success("Partner created successfully!");
+      toast.success(`${result?.message}`);
       console.log("API Response:", result);
 
       reset();
@@ -158,10 +158,7 @@ const AddNewPartener = () => {
         if (ref.current) ref.current.value = "";
       });
 
-      // الانتقال إلى صفحة الشركاء بعد نجاح الإنشاء
-      setTimeout(() => {
-        navigate("/admins/partners");
-      }, 1500);
+      navigate(`/admins/branches/new`);
     } catch (error: any) {
       console.error("Error creating partner:", error);
       handleApiError(error, "create");

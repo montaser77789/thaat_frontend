@@ -1,11 +1,19 @@
 export type PatientStatus =
+  | "Select Status"
   | "New Order"
   | "Under Revision"
   | "Dispatch To Service Provider"
   | "Order Confirmed"
   | "Invoice Sent"
   | "Payment Completed"
-  | "Medical Team On The Way";
+  | "Medical Team On The Way"
+  | "Medical Team Arrived"
+  | "Service Completed and Service Rating"
+  | "Follow Up Services"
+  | "Scheduling Additional Services"
+  | "Cancelled"
+  | "Refunded"
+  | "Cancelled By Thaat"
 
 export type TransactionStatus =
   | "Successful"
@@ -14,7 +22,7 @@ export type TransactionStatus =
   | "Refunded"
   | "-";
 
-export type ActionOption =
+export type  ActionOption =
   | "View Details"
   | "Duplicate"
   | "Location Link"

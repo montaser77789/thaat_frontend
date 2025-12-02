@@ -15,6 +15,7 @@ import Select from "../../../components/ui/Select";
 import { useGetCityQuery } from "../../../app/Api/Slices/CityApiSlice";
 import { consultationSchema } from "../../../validation/consultation";
 import ViewAppointment from "../../../components/appointment/ViewAppointment";
+import { FiPhone } from "react-icons/fi";
 
 const Appointment = () => {
   const params = useParams();
@@ -57,6 +58,10 @@ const Appointment = () => {
     console.log("Updated Data:", data);
     setIsEditing(false);
   };
+  const normalizePhone = (num: string) => {
+    if (!num.startsWith("+")) return "+" + num;
+    return num;
+  };
 
   return (
     <div>
@@ -83,7 +88,6 @@ const Appointment = () => {
       <form
         id="consult-form"
         className="space-y-4"
-        dir="rtl"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
@@ -111,15 +115,17 @@ const Appointment = () => {
                   disabled={!isEditing}
                   defaultCountry="SA"
                   countries={["SA", "EG"]}
-                  placeholder="Phone Number"
+                  placeholder="Enter phone number"
                   countryCallingCodeEditable={false}
-                  value={field.value}
-                  onChange={handlePhoneChange}
+                  value={field.value ? normalizePhone(field.value) : ""}
+                  onChange={(v) => field.onChange(normalizePhone(v || ""))}
                   inputComponent={Input}
                   style={{ direction: "ltr" }}
                 />
               )}
             />
+            <FiPhone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+
             {errors.phone_number && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.phone_number.message}
@@ -161,7 +167,8 @@ const Appointment = () => {
             error={!!errors.neighborhood}
             helperText={errors.neighborhood?.message}
           />
-
+        </div>
+        <div className="grid grid-cols-1  gap-4 text-left">
           <Textarea
             placeholder="Additional Details"
             label="Description"
@@ -173,7 +180,10 @@ const Appointment = () => {
         </div>
       </form>
       <div className="mt-4">
-        <ViewAppointment requestId={id} appointment={consultationRequest?.data.appointment} />
+        <ViewAppointment
+          requestId={id}
+          appointment={consultationRequest?.data.appointment}
+        />
       </div>
     </div>
   );

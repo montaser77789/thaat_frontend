@@ -6,7 +6,7 @@ import Select, {
   type StylesConfig,
   type MultiValueProps,
 } from "react-select";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useGetPartenersQuery } from "../../../app/Api/Slices/partenersApiSlice";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,9 +32,12 @@ import {
   useUpdateBranchMutation,
 } from "../../../app/Api/Slices/BranchesApiSlice";
 import { toast } from "react-toastify";
-import { customStyles, type City, type OptionType ,type Partner } from "../../../types";
-
-
+import {
+  customStyles,
+  type City,
+  type OptionType,
+  type Partner,
+} from "../../../types";
 
 type Service = {
   id: number;
@@ -43,13 +46,11 @@ type Service = {
   price?: string | null;
 };
 
-
 type WorkingHours = {
   week_days: string[];
   start_time: string;
   end_time: string;
 };
-
 
 type ServiceOptionType = {
   value: string;
@@ -99,7 +100,6 @@ type BranchResponse = {
   working_hours_per_day: WorkingHoursType[];
   branchServices: BranchServiceType[];
 };
-
 
 const multiSelectStyles: StylesConfig<ServiceOptionType, true> = {
   control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
@@ -221,6 +221,8 @@ const PartnerSelect: React.FC<{
 };
 
 const AddNewBranch: React.FC = () => {
+  const navigate = useNavigate();
+
   const params = useParams();
   const idbranch = params.id;
   const isEditMode = Boolean(idbranch);
@@ -268,13 +270,13 @@ const AddNewBranch: React.FC = () => {
   // تحويل البيانات إلى options
   const partnerOptions: OptionType[] = useMemo(
     () =>
-      partners.map((p ) => ({
+      partners.map((p) => ({
         value: String(p.id),
         label: p.name,
         partner: p,
         logo: p.logo_url ?? null,
       })),
-    [partners ]
+    [partners]
   );
 
   const cityOptions = useMemo(
@@ -318,8 +320,7 @@ const AddNewBranch: React.FC = () => {
         phone: branchData.phone || "",
         mobile: branchData.mobile || "",
         email: branchData.email || "",
-        service_ids:
-          branchData.branchServices?.map((bs) => String(bs.service_id)) || [],
+       
         working_hours_per_day:
           branchData.working_hours_per_day?.map((wh) => ({
             week_days: [wh.day],
@@ -344,11 +345,6 @@ const AddNewBranch: React.FC = () => {
     else setValue("city_id", "", { shouldValidate: true });
   };
 
-  // معالجة تغيير الـ services
-  const handleServicesChange = (opts: ServiceOptionType[] | null) => {
-    const values = opts ? opts.map((opt) => opt.value) : [];
-    setValue("service_ids", values, { shouldValidate: true });
-  };
 
   // إدارة ساعات العمل
   const workingHours = watch("working_hours_per_day") || [];
@@ -387,7 +383,6 @@ const AddNewBranch: React.FC = () => {
         ...formData,
         partner_id: Number(formData.partner_id),
         city_id: Number(formData.city_id),
-        service_ids: formData.service_ids.map((id) => Number(id)),
         status: formData.status,
         working_hours_per_day: formData.working_hours_per_day.map((wh) => ({
           week_days: wh.week_days,
@@ -409,6 +404,7 @@ const AddNewBranch: React.FC = () => {
       }
 
       console.log(res);
+      navigate(`/admins/branches`);
     } catch (err: any) {
       console.error(err);
       toast.error(err?.data?.message || "An error occurred");
@@ -649,7 +645,7 @@ const AddNewBranch: React.FC = () => {
         </div>
 
         {/* الخدمات */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        {/* <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-lg font-semibold mb-4">Services</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
@@ -686,7 +682,7 @@ const AddNewBranch: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* ساعات العمل */}
         <div className="bg-white p-6 rounded-lg shadow-sm">

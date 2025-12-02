@@ -146,16 +146,7 @@ const SinglePartener = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to={`/admins/partners/edit/${partner.id}`}>
-              <Button variant="outline" icon={<FiEdit />}>
-                Edit Partner
-              </Button>
-            </Link>
-            <Button variant="default" icon={<FiBriefcase />}>
-              Manage Branches
-            </Button>
-          </div>
+
         </div>
       </div>
 
@@ -353,15 +344,13 @@ const SinglePartener = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Quick Actions
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-3 ">
               <Link to={`/admins/partners/${partner.id}/edit`}>
                 <Button variant="outline" fullWidth icon={<FiEdit />}>
                   Edit Partner
                 </Button>
               </Link>
-              <Button variant="outline" fullWidth icon={<FiBriefcase />}>
-                View Branches
-              </Button>
+
               <Button variant="outline" fullWidth icon={<FiUser />}>
                 Contact Partner
               </Button>

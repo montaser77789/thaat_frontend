@@ -28,8 +28,6 @@ export const branchSchema = z.object({
   longitude: z.string().default(""),
   location: z.string().default(""),
 
-  // المصفوفات مع قيم افتراضية
-  service_ids: z.array(z.string()).default([]),
   working_hours_per_day: z.array(workingHoursSchema).default([]),
 });
 
@@ -55,5 +53,4 @@ export const defaultBranchValues: BranchFormData = {
   longitude: "",
   location: "",
   partner_id: "",
-  service_ids: [],
 };

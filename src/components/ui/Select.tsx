@@ -9,10 +9,7 @@ interface IProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const Select = forwardRef<HTMLSelectElement, IProps>(
-  (
-    { error, helperText, label, placeholder, options = [], ...rest }: IProps,
-    ref: Ref<HTMLSelectElement>
-  ) => {
+  ({ error, helperText, label, placeholder, options = [], ...rest }, ref) => {
     return (
       <div className="relative">
         {label && (
@@ -24,15 +21,16 @@ const Select = forwardRef<HTMLSelectElement, IProps>(
             ref={ref}
             className={`appearance-none border ${
               error ? "border-red-500" : "border-gray-300"
-            } shadow-lg focus:border-indigo-600 mt-1 text-left focus:outline-none focus:ring-1 focus:ring-indigo-600 rounded-lg px-2 py-3 text-md w-full bg-transparent pr-8`} // 👈 pr-8 لإتاحة مساحة للسهم
-            dir="rtl" // ✅ يخلي النص يمين والسهم يمين
+            } shadow-lg focus:border-indigo-600 mt-1 text-left focus:outline-none focus:ring-1 focus:ring-indigo-600 rounded-lg px-2 py-3 text-md w-full bg-transparent pr-8`}
+            dir="rtl"
             {...rest}
           >
             {placeholder && (
-              <option value="" disabled selected>
+              <option hidden value="">
                 {placeholder}
               </option>
             )}
+
             {options.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
