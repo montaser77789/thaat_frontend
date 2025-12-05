@@ -137,9 +137,9 @@ const AddNewTeam = () => {
       }
 
       navigate("/admins/teams"); // الانتقال إلى صفحة الفرق بعد الحفظ
-    } catch (error: any) {
-      console.error("Error saving team:", error);
-      toast.error(error?.data?.message || "Error saving team");
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

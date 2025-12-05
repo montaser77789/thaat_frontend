@@ -46,7 +46,16 @@ export const ConsultationApiSlice = createApi({
         method: "PATCH",
         body: { type },
       }),
+      invalidatesTags: ["Consultation"],
     }),
+    updateConsultationRequest: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/consultation-requests/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Consultation"],
+    })
   }),
 });
 
@@ -55,4 +64,5 @@ export const {
   useGetConsultationRequestsQuery,
   useGetConsultationRequestByIdQuery,
   useSendWhatsappMessageMutation,
+  useUpdateConsultationRequestMutation
 } = ConsultationApiSlice;

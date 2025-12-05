@@ -145,8 +145,9 @@ export default function Branches() {
         closeModal();
         toast.success(res.message);
         console.log(res);
-      } catch (error) {
-        console.error("Failed to delete branch:", error);
+      } catch (error: unknown | any) {
+        console.error("Error creating  request:", error);
+        toast.error(error?.data?.message);
       }
     }
   };

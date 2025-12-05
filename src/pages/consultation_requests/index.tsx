@@ -89,8 +89,9 @@ const CreateAppointment = ({
       reset();
       setIsOpen(false);
       toast.success(response.message);
-    } catch (error) {
-      console.error("Error creating consultation request:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

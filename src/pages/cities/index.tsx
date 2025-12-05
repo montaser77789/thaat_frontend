@@ -12,6 +12,7 @@ import type { City } from "../../types";
 import { Td, Th } from "../../components/ui/Tables";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const Cities = () => {
   const { data, isLoading, error, refetch } = useGetCityQuery({});
@@ -76,8 +77,9 @@ const Cities = () => {
 
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error saving city:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 
@@ -89,8 +91,9 @@ const Cities = () => {
       await deleteCity(deletingCity.id).unwrap();
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error deleting city:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

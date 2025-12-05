@@ -303,6 +303,12 @@ const EditAppoientment = () => {
 
   const handleFormSubmit = async (data: ExtendedAppointmentFormData) => {
     // Normalize fields → convert numeric strings to numbers
+    if (!data.patment_method) {
+      data.patment_method = "cash";
+    }
+    if (!data.transaction_status) {
+      data.transaction_status = "pending";
+    }
     const itemsToSend = fields.map((item) => ({
       id: item.id,
       service_id: item.service_id ? Number(item.service_id) : null,
@@ -312,12 +318,11 @@ const EditAppoientment = () => {
       quantity: Number(item.quantity) || 1,
     }));
 
-    console.log("itemsToSend", itemsToSend);
-
     const payload = {
       ...data,
       items: itemsToSend,
     };
+    console.log("itemsToSend", payload);
     try {
       if (isEditMode) {
         const response = await editAppointment({
@@ -327,8 +332,9 @@ const EditAppoientment = () => {
         console.log("response", response);
         toast.success(response.message);
       }
-    } catch (error) {
+    } catch (error: unknown | any) {
       console.error("Error creating consultation request:", error);
+      toast.error(error?.data?.message);
     }
 
     console.log("payload", payload);

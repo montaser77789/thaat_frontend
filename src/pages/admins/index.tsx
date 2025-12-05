@@ -13,6 +13,7 @@ import {
   useGetadminQuery,
   useUpdateadminMutation,
 } from "../../app/Api/Slices/AdminApiSlice";
+import { toast } from "react-toastify";
 
 interface AdminForm {
   first_name: string;
@@ -102,8 +103,9 @@ const Admins = () => {
 
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error saving admin:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 
@@ -115,8 +117,9 @@ const Admins = () => {
       await deleteAdmin(deletingAdmin.id).unwrap();
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error deleting admin:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating consultation request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

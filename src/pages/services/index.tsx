@@ -139,8 +139,9 @@ const Services = () => {
       const result = await deleteService(id).unwrap();
       closeModal();
       toast.success(`${result?.message}`);
-    } catch (error) {
-      console.error("Failed to delete service:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

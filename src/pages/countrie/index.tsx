@@ -13,6 +13,7 @@ import {
   useGetCountriesQuery,
   useUpdateCountryMutation,
 } from "../../app/Api/Slices/CountryApiSlice";
+import { toast } from "react-toastify";
 
 interface CountryForm {
   name: string;
@@ -87,8 +88,9 @@ const Countries = () => {
 
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error saving country:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 
@@ -100,8 +102,9 @@ const Countries = () => {
       await deleteCountry(deletingCountry.id).unwrap();
       closeModals();
       refetch(); // Reload data
-    } catch (error) {
-      console.error("Error deleting country:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating  request:", error);
+      toast.error(error?.data?.message);
     }
   };
 

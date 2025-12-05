@@ -229,8 +229,9 @@ export default function PatientList() {
 
       toast.success(res.message);
       console.log("WhatsApp sent:", res);
-    } catch (error) {
-      console.error("Failed to send WhatsApp:", error);
+    } catch (error: unknown | any) {
+      console.error("Error creating consultation request:", error);
+      toast.error(error?.data?.message);
     }
   };
 
@@ -426,7 +427,10 @@ export default function PatientList() {
                             [row.id]: newValue as PatientStatus,
                           }));
 
-                          handleStatusForceChange(row.id, newValue as PatientStatus);
+                          handleStatusForceChange(
+                            row.id,
+                            newValue as PatientStatus
+                          );
                         }}
                       />
                     </Td>
@@ -605,4 +609,3 @@ function CustomSelect({
     </div>
   );
 }
-
