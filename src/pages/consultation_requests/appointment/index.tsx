@@ -64,7 +64,7 @@ const Appointment = () => {
   };
 
   return (
-    <div>
+    <div className="bg-white shadow-md rounded-xl p-6">
       <div className="flex gap-3 mb-4">
         {!isEditing ? (
           <Button onClick={() => setIsEditing(true)}>Edit</Button>
@@ -90,7 +90,7 @@ const Appointment = () => {
         className="space-y-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-left">
           <Input
             label="Patient Name"
             placeholder="Patient Name"

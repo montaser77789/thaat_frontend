@@ -320,7 +320,7 @@ const AddNewBranch: React.FC = () => {
         phone: branchData.phone || "",
         mobile: branchData.mobile || "",
         email: branchData.email || "",
-       
+
         working_hours_per_day:
           branchData.working_hours_per_day?.map((wh) => ({
             week_days: [wh.day],
@@ -344,7 +344,6 @@ const AddNewBranch: React.FC = () => {
     if (opt) setValue("city_id", opt.value, { shouldValidate: true });
     else setValue("city_id", "", { shouldValidate: true });
   };
-
 
   // إدارة ساعات العمل
   const workingHours = watch("working_hours_per_day") || [];

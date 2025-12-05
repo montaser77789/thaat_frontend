@@ -574,7 +574,7 @@ function CustomSelect({
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="">
       {/* Selected box */}
       <div
         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 cursor-pointer"
