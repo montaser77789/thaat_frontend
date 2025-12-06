@@ -18,6 +18,7 @@ export const branchSchema = z.object({
   contact_person_email: z.string().email("Valid email is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   address: z.string().min(1, "Address is required"),
+  categories: z.array(z.string()).min(1, "At least one catagory is required"),
 
   // الحقول التي كانت اختيارية - اجعلها مطلوبة مع قيم افتراضية
   name_locale: z.string().default(""),
@@ -53,4 +54,5 @@ export const defaultBranchValues: BranchFormData = {
   longitude: "",
   location: "",
   partner_id: "",
+  categories: [],
 };

@@ -25,7 +25,6 @@ const Appointment = () => {
   const params = useParams();
   const id = params.cosultationRequestId;
 
-  const [phoneValue, setPhoneValue] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false); // NEW
 
   const { data: consultationRequest } = useGetConsultationRequestByIdQuery(id);
@@ -42,7 +41,6 @@ const Appointment = () => {
     handleSubmit,
     control,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<z.infer<typeof consultationSchema>>({
     resolver: zodResolver(consultationSchema),
@@ -61,10 +59,7 @@ const Appointment = () => {
     }
   }, [consultationRequest, reset]);
 
-  const handlePhoneChange = (value: string | undefined) => {
-    setPhoneValue(value || "");
-    setValue("phone_number", value || "");
-  };
+
 
   const onSubmit = async (data: any) => {
     try {

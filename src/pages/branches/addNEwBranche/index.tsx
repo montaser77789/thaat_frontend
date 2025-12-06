@@ -11,7 +11,6 @@ import { useGetPartenersQuery } from "../../../app/Api/Slices/partenersApiSlice"
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetCityQuery } from "../../../app/Api/Slices/CityApiSlice";
-import { useGetServicesQuery } from "../../../app/Api/Slices/ServiceApiSlice";
 import Input from "../../../components/ui/Input";
 import {
   FiBriefcase,
@@ -38,43 +37,38 @@ import {
   type OptionType,
   type Partner,
 } from "../../../types";
+import { useGetCatagoresQuery } from "../../../app/Api/Slices/catagoryApiSlice";
 
-type Service = {
+// تعريف نوع الكاتيجوري
+type Category = {
   id: number;
-  name: string;
-  cost?: string | null;
-  price?: string | null;
+  name_en: string;
+  name_ar: string;
+  file: string;
 };
 
+// تعريف نوع catagory من الـ response
+type BranchCatagory = {
+  branch_id: number;
+  catagory_id: number;
+  catagory: Category;
+};
+
+// تعريف نوع الـ Option للكاتيجوري
+type CategoryOptionType = {
+  value: string;
+  label: string;
+  category?: Category;
+};
+
+// تعريف ساعات العمل
 type WorkingHours = {
   week_days: string[];
   start_time: string;
   end_time: string;
 };
 
-type ServiceOptionType = {
-  value: string;
-  label: string;
-  service?: Service;
-};
-
-type WorkingHoursType = {
-  id: number;
-  medical_branch_id: number;
-  day: string;
-  start_time: string;
-  end_time: string;
-  created_at: string;
-  updated_at: string;
-};
-
-type BranchServiceType = {
-  id: number;
-  medical_branch_id: number;
-  service_id: number;
-  service: Service;
-};
-
+// تعريف بيانات الفرع من الـ API بناءً على الـ response
 type BranchResponse = {
   id: number;
   name: string;
@@ -97,11 +91,13 @@ type BranchResponse = {
   updated_at: string;
   partner: Partner;
   city: City;
-  working_hours_per_day: WorkingHoursType[];
-  branchServices: BranchServiceType[];
+  working_hours_per_day: any[];
+  branch_items: any[];
+  catagories: BranchCatagory[];
 };
 
-const multiSelectStyles: StylesConfig<ServiceOptionType, true> = {
+// أنماط الـ Multi-select
+const multiSelectStyles: StylesConfig<CategoryOptionType, true> = {
   control: (base) => ({ ...base, minHeight: 48, padding: 5, borderRadius: 6 }),
   option: (base) => ({ ...base, padding: 12 }),
   multiValue: (base) => ({ ...base, backgroundColor: "#e2e8f0" }),
@@ -190,7 +186,8 @@ const SingleValue = (props: SingleValueProps<OptionType>) => {
   );
 };
 
-const MultiValue = (props: MultiValueProps<ServiceOptionType>) => {
+// MultiValue مخصص للكاتيجوريات
+const CategoryMultiValue = (props: MultiValueProps<CategoryOptionType>) => {
   return (
     <components.MultiValue {...props}>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -222,7 +219,6 @@ const PartnerSelect: React.FC<{
 
 const AddNewBranch: React.FC = () => {
   const navigate = useNavigate();
-
   const params = useParams();
   const idbranch = params.id;
   const isEditMode = Boolean(idbranch);
@@ -251,8 +247,6 @@ const AddNewBranch: React.FC = () => {
     defaultValues: defaultBranchValues,
   });
 
-  console.log("errors", errors);
-
   // جلب البيانات من الـ APIs
   const { data: partnersData, isLoading: partnersLoading } =
     useGetPartenersQuery({
@@ -260,12 +254,12 @@ const AddNewBranch: React.FC = () => {
       limit: perPage,
     });
   const { data: citiesData, isLoading: citiesLoading } = useGetCityQuery({});
-  const { data: servicesData, isLoading: servicesLoading } =
-    useGetServicesQuery({});
+  const { data: catagoriesData, isLoading: catagoriesLoading } =
+    useGetCatagoresQuery({});
 
   const partners: Partner[] = partnersData?.data || [];
   const cities: City[] = citiesData?.data || [];
-  const services: Service[] = servicesData?.data.services || [];
+  const categories: Category[] = catagoriesData?.data || [];
 
   // تحويل البيانات إلى options
   const partnerOptions: OptionType[] = useMemo(
@@ -287,21 +281,25 @@ const AddNewBranch: React.FC = () => {
       })),
     [cities]
   );
-
-  const serviceOptions: ServiceOptionType[] = useMemo(
+console.log("categories",catagoriesData)  
+  // تحويل الكاتيجوريات إلى CategoryOptionType
+  const categoryOptions: CategoryOptionType[] = useMemo(
     () =>
-      services.map((s) => ({
-        value: String(s.id),
-        label: s.name,
-        service: s,
+      categories.map((cat) => ({
+        value: String(cat.id),
+        label: cat.name_ar || cat.name_en,
+        category: cat,
       })),
-    [services]
+    [categories]
   );
 
   // تحميل البيانات في وضع التعديل
   useEffect(() => {
     if (isEditMode && branchResponse?.data) {
       const branchData: BranchResponse = branchResponse.data;
+
+      console.log("Branch data for edit:", branchData);
+      console.log("Categories data:", branchData.catagories);
 
       const formData: BranchFormData = {
         name: branchData.name || "",
@@ -320,15 +318,20 @@ const AddNewBranch: React.FC = () => {
         phone: branchData.phone || "",
         mobile: branchData.mobile || "",
         email: branchData.email || "",
+        // تحويل catagories إلى array of IDs (strings)
+        categories: (branchData.catagories || []).map((catItem) => 
+          String(catItem.catagory.id)
+        ),
 
         working_hours_per_day:
-          branchData.working_hours_per_day?.map((wh) => ({
-            week_days: [wh.day],
-            start_time: wh.start_time,
-            end_time: wh.end_time,
-          })) || [],
+          (branchData.working_hours_per_day || []).map((wh: any) => ({
+            week_days: wh.day ? [wh.day] : [],
+            start_time: wh.start_time || "09:00",
+            end_time: wh.end_time || "17:00",
+          })),
       };
 
+      console.log("Form data after mapping:", formData);
       reset(formData);
     }
   }, [isEditMode, branchResponse, reset]);
@@ -343,6 +346,16 @@ const AddNewBranch: React.FC = () => {
   const handleCityChange = (opt: OptionType | null) => {
     if (opt) setValue("city_id", opt.value, { shouldValidate: true });
     else setValue("city_id", "", { shouldValidate: true });
+  };
+
+  // معالجة تغيير الكاتيجوريات
+  const handleCategoriesChange = (selectedOptions: CategoryOptionType[] | null) => {
+    if (selectedOptions) {
+      const categoryIds = selectedOptions.map((opt) => opt.value);
+      setValue("categories", categoryIds, { shouldValidate: true });
+    } else {
+      setValue("categories", [], { shouldValidate: true });
+    }
   };
 
   // إدارة ساعات العمل
@@ -383,12 +396,16 @@ const AddNewBranch: React.FC = () => {
         partner_id: Number(formData.partner_id),
         city_id: Number(formData.city_id),
         status: formData.status,
+        // تحويل array of strings إلى array of numbers
+        categories: formData.categories.map((id) => Number(id)),
         working_hours_per_day: formData.working_hours_per_day.map((wh) => ({
           week_days: wh.week_days,
           start_time: wh.start_time,
           end_time: wh.end_time,
         })),
       };
+
+      console.log("Payload for API:", payload);
 
       let res;
       if (isEditMode && idbranch) {
@@ -402,10 +419,10 @@ const AddNewBranch: React.FC = () => {
         reset();
       }
 
-      console.log(res);
+      console.log("API Response:", res);
       navigate(`/admins/branches`);
     } catch (err: any) {
-      console.error(err);
+      console.error("Error submitting form:", err);
       toast.error(err?.data?.message || "An error occurred");
     }
   };
@@ -420,6 +437,9 @@ const AddNewBranch: React.FC = () => {
       </div>
     );
   }
+
+  // الحصول على القيم المختارة للكاتيجوريات لعرضها في الـ Select
+  const selectedCategories = watch("categories") || [];
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -643,45 +663,45 @@ const AddNewBranch: React.FC = () => {
           </div>
         </div>
 
-        {/* الخدمات */}
-        {/* <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Services</h2>
+        {/* Categories */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold mb-4">Categories</h2>
           <div className="grid grid-cols-1 gap-6">
             <div>
               <label className="font-bold text-gray-700 block mb-1">
-                Select Services
+                Select Categories
               </label>
               <Controller
                 control={control}
-                name="service_ids"
+                name="categories"
                 render={({ field }) => (
-                  <Select
-                    options={serviceOptions}
+                  <Select<CategoryOptionType, true>
+                    options={categoryOptions}
                     styles={multiSelectStyles}
-                    isLoading={servicesLoading}
+                    isLoading={catagoriesLoading}
                     isMulti
-                    value={serviceOptions.filter((opt) =>
-                      field.value.includes(opt.value)
+                    // تحويل array of IDs إلى array of CategoryOptionType
+                    value={categoryOptions.filter((opt) =>
+                      selectedCategories.includes(opt.value)
                     )}
                     onChange={(v) => {
-                      const values = v
-                        ? (v as ServiceOptionType[]).map((opt) => opt.value)
-                        : [];
-                      field.onChange(values);
-                      handleServicesChange(v as ServiceOptionType[] | null);
+                      handleCategoriesChange(v as CategoryOptionType[] | null);
+                      field.onChange(
+                        v ? (v as CategoryOptionType[]).map((opt) => opt.value) : []
+                      );
                     }}
-                    components={{ MultiValue }}
+                    components={{ MultiValue: CategoryMultiValue }}
                   />
                 )}
               />
-              {errors.service_ids && (
+              {errors.categories && (
                 <p className="text-sm text-red-600 mt-1">
-                  {errors.service_ids.message}
+                  {errors.categories.message}
                 </p>
               )}
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* ساعات العمل */}
         <div className="bg-white p-6 rounded-lg shadow-sm">

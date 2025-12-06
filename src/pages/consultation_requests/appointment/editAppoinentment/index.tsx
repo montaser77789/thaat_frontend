@@ -20,7 +20,6 @@ import Button from "../../../../components/ui/Button";
 import Input from "../../../../components/ui/Input";
 import { FiUser, FiTrash2 } from "react-icons/fi";
 import { useGetConsultationRequestByIdQuery } from "../../../../app/Api/Slices/ConsultationApiSlice";
-import { useGetServicesByCatagoryQuery } from "../../../../app/Api/Slices/ServiceApiSlice";
 import {
   useEditAppointmentMutation,
   useGetAppointmentByIdQuery,
@@ -32,6 +31,7 @@ interface ServiceOption {
   id: string;
   value: string;
   label: string;
+  name: string;
   cost?: number;
   price?: number;
   quantity?: number;
@@ -102,11 +102,6 @@ const EditAppoientment = () => {
   const catagoryId = consultation?.data?.catagory_id;
   const cityId = consultation?.data?.city_id;
 
-  const { data: services } = useGetServicesByCatagoryQuery({
-    catagory_id: catagoryId,
-    city_id: cityId,
-  });
-
   const {
     register,
     handleSubmit,
@@ -143,6 +138,7 @@ const EditAppoientment = () => {
     useGerBranchByPartnerQuery(partener_id ? Number(partener_id) : 0, {
       skip: !partener_id,
     });
+  console.log("branchesData", branchesData);
 
   const { data: specialistsData, isLoading: specialistsLoading } =
     useGetSpecialistBybranchIdQuery(
@@ -220,18 +216,21 @@ const EditAppoientment = () => {
       })),
     [specialists]
   );
+  const serviceOptions: ServiceOption[] = useMemo(() => {
+    if (!branches) return [];
 
-  const serviceOptions: ServiceOption[] = useMemo(
-    () =>
-      (services?.data || []).map((service: any) => ({
-        id: service.id,
-        value: String(service.id),
-        label: service.name,
-        cost: service.cost,
-        price: service.price,
-      })),
-    [services]
-  );
+    // اجمع كل الكاتيجوريز من كل الفروع
+    const allCategories = branches.flatMap(
+      (branch: any) =>
+        branch.catagories?.map((cat: any) => ({
+          id: cat.catagory.id,
+          label: cat.catagory.name_ar || cat.catagory.name_en,
+        })) || []
+    );
+
+    return allCategories;
+  }, [branches]);
+  console.log("serviceOptions", specialistOptions);
 
   const handlePartnerChange = (partnerId: string) => {
     setValue("branch_id", "");
