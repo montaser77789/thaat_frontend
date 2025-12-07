@@ -95,12 +95,7 @@ const EditAppoientment = () => {
   );
   console.log("selectedService", selectedService);
   const [serviceQuantity, setServiceQuantity] = useState<number>(1);
-  const [editAppointment, { isLoading: isEditLoading }] =
-    useEditAppointmentMutation();
-
-  const { data: consultation } = useGetConsultationRequestByIdQuery(request_id);
-  const catagoryId = consultation?.data?.catagory_id;
-  const cityId = consultation?.data?.city_id;
+  const [editAppointment] = useEditAppointmentMutation();
 
   const {
     register,
@@ -123,10 +118,10 @@ const EditAppoientment = () => {
     control,
     name: "items",
   });
+  console.log("fields", fields);
 
   const partener_id = watch("partener_id");
   const medical_branch_id = watch("branch_id");
-  const specialist_id = watch("specialist_id");
 
   const { data: partnersData, isLoading: partnersLoading } =
     useGetPartenersQuery({
@@ -138,7 +133,6 @@ const EditAppoientment = () => {
     useGerBranchByPartnerQuery(partener_id ? Number(partener_id) : 0, {
       skip: !partener_id,
     });
-  console.log("branchesData", branchesData);
 
   const { data: specialistsData, isLoading: specialistsLoading } =
     useGetSpecialistBybranchIdQuery(
@@ -217,19 +211,40 @@ const EditAppoientment = () => {
     [specialists]
   );
   const serviceOptions: ServiceOption[] = useMemo(() => {
-    if (!branches) return [];
-
-    // اجمع كل الكاتيجوريز من كل الفروع
-    const allCategories = branches.flatMap(
-      (branch: any) =>
-        branch.catagories?.map((cat: any) => ({
-          id: cat.catagory.id,
-          label: cat.catagory.name_ar || cat.catagory.name_en,
-        })) || []
+    if (!branches || !medical_branch_id) return [];
+    
+    // ابحث عن الفرع المحدد
+    const selectedBranch = branches.find(
+      (branch: any) => String(branch.id) === medical_branch_id
     );
+    
+    if (!selectedBranch) return [];
+    console.log("specialistOptions", selectedBranch);
 
-    return allCategories;
-  }, [branches]);
+    // اجمع كل الخدمات من كل التصنيفات في هذا الفرع
+    const allServices: ServiceOption[] = [];
+
+    // التكرار عبر كل تصنيفات الفرع
+    selectedBranch.catagories?.forEach((catagory: any) => {
+      // التحقق من وجود services في catagory
+      if (catagory.catagory?.services) {
+        catagory.catagory.services.forEach((service: any) => {
+          allServices.push({
+            value: String(service.id),
+            label: service.name,
+            cost: parseFloat(service.cost) || 0,
+            price: parseFloat(service.price) || 0,
+            id: service.id,
+            name: service.name,
+            quantity: 1,
+          });
+        });
+      }
+    });
+
+    return allServices;
+  }, [branches, medical_branch_id]);
+
   console.log("serviceOptions", specialistOptions);
 
   const handlePartnerChange = (partnerId: string) => {

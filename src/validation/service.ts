@@ -7,7 +7,6 @@ const createServiceSchema = z.object({
   price: z.string().min(1, "Price is required"),
   code: z.string().min(1, "Code is required"),
   catagory_id: z.string().min(1, "Category is required"),
-  city_id: z.string().min(1, "City is required"),
   file: z.union([z.instanceof(File), z.null()]).optional(),
 });
 

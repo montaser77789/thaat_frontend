@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import {
   useDeleteServiceMutation,
   useGetServicesQuery,
 } from "../../app/Api/Slices/ServiceApiSlice";
-import { useGetCityQuery } from "../../app/Api/Slices/CityApiSlice";
 import Button from "../../components/ui/Button";
 import { Link, useSearchParams } from "react-router-dom";
 import { FaEdit, FaEye, FaPlus, FaSearch, FaTrash } from "react-icons/fa";
@@ -22,10 +21,8 @@ const Services = () => {
   const page = Number(searchParams.get("page") || "1");
   const perPage = Number(searchParams.get("per_page") || "10");
   const urlSearch = searchParams.get("search") || "";
-  const urlCityId = searchParams.get("city_id") || "";
   const urlCategoryId = searchParams.get("category_id") || "";
 
-  const [selectedCityId, setSelectedCityId] = useState<string>(urlCityId);
   const [selectedCategoryId, setSelectedCategoryId] =
     useState<string>(urlCategoryId);
   const [searchTerm, setSearchTerm] = useState<string>(urlSearch);
@@ -38,14 +35,12 @@ const Services = () => {
     limit: perPage,
     page: page,
     search: urlSearch,
-    city_id: urlCityId,
     category_id: urlCategoryId,
   });
   console.log("services", services);
 
   const { data: catagoryData } = useGetCatagoresQuery({});
   const [deleteService] = useDeleteServiceMutation();
-  const { data: citiesData } = useGetCityQuery({});
 
   // البيانات من الـ API
   const servicesData = services?.data.services || [];
@@ -56,14 +51,8 @@ const Services = () => {
     perPage: perPage,
   };
 
-  const cities = citiesData?.data || [];
   const categories = catagoryData?.data || [];
 
-  // تحضير الـ options للـ Select
-  const cityOptions: OptionType[] = cities.map((city: any) => ({
-    value: String(city.id),
-    label: city.name,
-  }));
 
   const categoryOptions: OptionType[] = categories.map((category: any) => ({
     value: String(category.id),
@@ -109,11 +98,7 @@ const Services = () => {
     updateFilters({ search: value, page: 1 });
   };
 
-  // معالجة تغيير المدينة
-  const handleCityChange = (cityId: string) => {
-    setSelectedCityId(cityId);
-    updateFilters({ city_id: cityId, page: 1 });
-  };
+
 
   // معالجة تغيير التصنيف
   const handleCategoryChange = (categoryId: string) => {
@@ -146,7 +131,7 @@ const Services = () => {
   };
 
   // التحقق إذا كان هناك فلاتر مطبقة
-  const filtersApplied = urlSearch || urlCityId || urlCategoryId;
+  const filtersApplied = urlSearch  || urlCategoryId;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -187,22 +172,7 @@ const Services = () => {
             />
           </div>
 
-          {/* City Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              City
-            </label>
-            <Select<OptionType>
-              options={cityOptions}
-              value={
-                cityOptions.find((opt) => opt.value === selectedCityId) || null
-              }
-              onChange={(opt) => handleCityChange(opt?.value || "")}
-              placeholder="Select City"
-              isClearable
-              styles={customStyles}
-            />
-          </div>
+   
 
           {/* Category Filter */}
           <div>
@@ -345,7 +315,6 @@ const Services = () => {
                   params.set("page", String(newPage));
                   params.set("per_page", String(newPerPage));
                   if (urlSearch) params.set("search", urlSearch);
-                  if (urlCityId) params.set("city_id", urlCityId);
                   if (urlCategoryId) params.set("category_id", urlCategoryId);
                   return params;
                 });

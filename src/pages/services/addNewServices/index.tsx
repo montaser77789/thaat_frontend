@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, type RefObject } from "react";
-import { useGetCityQuery } from "../../../app/Api/Slices/CityApiSlice";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import createServiceSchema from "../../../validation/service";
@@ -7,7 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { customStyles, type OptionType } from "../../../types";
 import { useGetCatagoresQuery } from "../../../app/Api/Slices/catagoryApiSlice";
 import type { Catagory } from "../../categories";
-import { FiCheckCircle, FiDownload, FiFileText, FiMapPin, FiUpload, FiUser, FiX } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiDownload,
+  FiFileText,
+  FiMapPin,
+  FiUpload,
+  FiUser,
+  FiX,
+} from "react-icons/fi";
 import Select from "react-select";
 import {
   useCreateServiceMutation,
@@ -25,7 +32,6 @@ type ServiceForm = {
   price: string;
   code: string;
   catagory_id: string;
-  city_id: string;
   file?: File | null;
 };
 
@@ -35,7 +41,6 @@ const defaultServiceValues: ServiceForm = {
   price: "",
   code: "",
   catagory_id: "",
-  city_id: "",
   file: undefined,
 };
 
@@ -44,10 +49,9 @@ const AddNewService = () => {
   const params = useParams();
   const idService = params.id;
   const isEditMode = Boolean(idService);
-  
-  const { data: citiesData, isLoading: citiesLoading } = useGetCityQuery({});
+
   const { data: catagoryData } = useGetCatagoresQuery({});
-  
+
   const {
     register,
     handleSubmit,
@@ -64,9 +68,9 @@ const AddNewService = () => {
   const [createService, { isLoading: isAdding }] = useCreateServiceMutation();
   const [updateService, { isLoading: isUpdating }] = useUpdateServiceMutation();
 
-  const { data: serviceData, isLoading: isLoadingService } = 
+  const { data: serviceData, isLoading: isLoadingService } =
     useGetServiceByIdQuery(idService!, { skip: !isEditMode });
-  console.log(serviceData , isEditMode);
+  console.log(serviceData, isEditMode);
 
   useEffect(() => {
     if (isEditMode && serviceData) {
@@ -76,26 +80,14 @@ const AddNewService = () => {
         price: serviceData?.data.price || "",
         code: serviceData?.data.code || "",
         catagory_id: serviceData?.data.catagory_id || "",
-        city_id: serviceData?.data.city_id || "",
       };
 
       reset(formData);
       setValue("file", serviceData?.data.file || "");
     }
-
   }, [isEditMode, serviceData, reset]);
 
-  const cities = citiesData?.data || [];
   const catagories = catagoryData?.data || [];
-
-  const cityOptions = useMemo(
-    () =>
-      cities.map((city: any) => ({
-        value: String(city.id),
-        label: city.name,
-      })),
-    [cities]
-  );
 
   const catagoryOptions: OptionType[] = useMemo(
     () =>
@@ -112,14 +104,13 @@ const AddNewService = () => {
   const onSubmit = async (data: ServiceForm) => {
     try {
       const formData = new FormData();
-      
+
       // Append basic data
       formData.append("name", data.name);
       formData.append("cost", data.cost);
       formData.append("price", data.price);
       formData.append("code", data.code);
       formData.append("catagory_id", data.catagory_id);
-      formData.append("city_id", data.city_id);
 
       // Append file if exists
       if (data.file instanceof File) {
@@ -187,7 +178,10 @@ const AddNewService = () => {
         return "image";
       } else if (extension === "pdf") {
         return "pdf";
-      } else if (["doc", "docx"]?.includes(extension || "") || extension === "odt") {
+      } else if (
+        ["doc", "docx"]?.includes(extension || "") ||
+        extension === "odt"
+      ) {
         return "word";
       } else {
         return "file";
@@ -243,12 +237,14 @@ const AddNewService = () => {
                     className="w-16 h-16 rounded-lg object-cover border border-gray-200"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
+                      target.style.display = "none";
                       const parent = target.parentElement;
                       if (parent) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200';
-                        fallback.innerHTML = '<span class="text-gray-400 text-xs">Error</span>';
+                        const fallback = document.createElement("div");
+                        fallback.className =
+                          "w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200";
+                        fallback.innerHTML =
+                          '<span class="text-gray-400 text-xs">Error</span>';
                         parent.appendChild(fallback);
                       }
                     }}
@@ -304,7 +300,9 @@ const AddNewService = () => {
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = existingFileUrl;
-                  link.download = `service_logo.${existingFileUrl?.split(".").pop()}`;
+                  link.download = `service_logo.${existingFileUrl
+                    ?.split(".")
+                    .pop()}`;
                   link.click();
                 }}
                 className="flex items-center gap-1 text-purple-600 hover:text-purple-800 text-sm font-medium px-3 py-1 rounded hover:bg-purple-50 transition-colors"
@@ -498,47 +496,13 @@ const AddNewService = () => {
           <div>
             <label className="font-bold text-gray-700 mb-1 flex items-center gap-2">
               <FiMapPin className="text-blue-600" />
-              City *
-            </label>
-            <Controller
-              control={control}
-              name="city_id"
-              render={({ field }) => (
-                <Select
-                  options={cityOptions}
-                  isLoading={citiesLoading}
-                  value={
-                    cityOptions.find(
-                      (o: OptionType) => o.value === field.value
-                    ) ?? null
-                  }
-                  onChange={(opt) => {
-                    const value = opt ? opt.value : "";
-                    field.onChange(value);
-                  }}
-                  placeholder="Select city"
-                  styles={customStyles}
-                  isDisabled={isLoading}
-                />
-              )}
-            />
-            {errors.city_id && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.city_id?.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="font-bold text-gray-700 mb-1 flex items-center gap-2">
-              <FiMapPin className="text-blue-600" />
               Category *
             </label>
             <Controller
               control={control}
               name="catagory_id"
               render={({ field }) => (
-                <Select <{label: string , value: string}>
+                <Select<{ label: string; value: string }>
                   options={catagoryOptions}
                   value={
                     catagoryOptions.find(
@@ -581,10 +545,7 @@ const AddNewService = () => {
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            isloading={isLoading}
-          >
+          <Button type="submit" isloading={isLoading}>
             {isEditMode ? "Update Service" : "Create Service"}
           </Button>
         </div>
