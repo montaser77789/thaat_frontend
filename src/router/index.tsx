@@ -32,6 +32,7 @@ import Services from "../pages/services";
 import AddNewSercice from "../pages/services/addNewServices";
 import Appointment from "../pages/consultation_requests/appointment";
 import EditAppoientment from "../pages/consultation_requests/appointment/editAppoinentment";
+import AppointmentsItems from "../pages/consultation_requests/appointment/AppointmentsItems";
 
 const token = Cookies.get("access_token");
 
@@ -272,6 +273,14 @@ const router = createBrowserRouter(
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <AddNewSercice />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="appointments/items"
+            element={
+              <ProtectedRoute isAllowed={!!token} redirectPath="/login">
+                <AppointmentsItems />
               </ProtectedRoute>
             }
           />

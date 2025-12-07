@@ -29,8 +29,16 @@ export const appointmentApiSlice = createApi({
     getAppointmentById: builder.query({
       query: (id) => `/api/appointments/${id}`,
       providesTags: ["appointment"],
-    })
+    }),
+    getappointmentItemService: builder.query({
+      query: () => `/api/appointmentItemService`,
+      providesTags: ["appointment"],
+    }),
   }),
 });
 
-export const { useEditAppointmentMutation ,useGetAppointmentByIdQuery } = appointmentApiSlice;
+export const {
+  useEditAppointmentMutation,
+  useGetAppointmentByIdQuery,
+  useGetappointmentItemServiceQuery,
+} = appointmentApiSlice;

@@ -102,7 +102,7 @@ export const sidebarSections: SidebarSection[] = [
           item: {
             id: "partners_items",
             label: "Items",
-            href: "/admins/partners/items",
+            href: "/admins/appointments/items",
             icon: FiPackage,
           },
         },
