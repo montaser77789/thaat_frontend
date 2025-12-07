@@ -373,10 +373,11 @@ const AddNewSpecialist = () => {
         }).unwrap();
         toast.success("Specialist updated successfully");
       } else {
-        console.log("🔄 Calling create API with FormData...");
         await addSpecialist(formDataToSend).unwrap();
         toast.success("Specialist created successfully");
       }
+
+      navigate("/admins/specialists");
     } catch (error: any) {
       console.error("❌ Error submitting form:", error);
       toast.error(

@@ -211,35 +211,60 @@ const EditAppoientment = () => {
     [specialists]
   );
   const serviceOptions: ServiceOption[] = useMemo(() => {
-    if (!branches || !medical_branch_id) return [];
-    
-    // ابحث عن الفرع المحدد
-    const selectedBranch = branches.find(
-      (branch: any) => String(branch.id) === medical_branch_id
-    );
-    
-    if (!selectedBranch) return [];
-    console.log("specialistOptions", selectedBranch);
+    if (!branches || branches.length === 0) return [];
 
-    // اجمع كل الخدمات من كل التصنيفات في هذا الفرع
+    // إذا كان هناك medical_branch_id، ابحث في ذلك الفرع
+    if (medical_branch_id) {
+      const selectedBranch = branches.find(
+        (branch: any) => String(branch.id) === medical_branch_id
+      );
+
+      if (selectedBranch) {
+        const allServices: ServiceOption[] = [];
+
+        selectedBranch.catagories?.forEach((catagory: any) => {
+          if (catagory.catagory?.services) {
+            catagory.catagory.services.forEach((service: any) => {
+              allServices.push({
+                value: String(service.id),
+                label: service.name,
+                cost: parseFloat(service.cost) || 0,
+                price: parseFloat(service.price) || 0,
+                id: service.id,
+                name: service.name,
+                quantity: 1,
+              });
+            });
+          }
+        });
+
+        return allServices;
+      }
+    }
+
+    // إذا لم يكن هناك medical_branch_id أو لم يتم العثور على الفرع
+    // اجمع الخدمات من جميع الفروع
     const allServices: ServiceOption[] = [];
 
-    // التكرار عبر كل تصنيفات الفرع
-    selectedBranch.catagories?.forEach((catagory: any) => {
-      // التحقق من وجود services في catagory
-      if (catagory.catagory?.services) {
-        catagory.catagory.services.forEach((service: any) => {
-          allServices.push({
-            value: String(service.id),
-            label: service.name,
-            cost: parseFloat(service.cost) || 0,
-            price: parseFloat(service.price) || 0,
-            id: service.id,
-            name: service.name,
-            quantity: 1,
+    branches.forEach((branch: any) => {
+      branch.catagories?.forEach((catagory: any) => {
+        if (catagory.catagory?.services) {
+          catagory.catagory.services.forEach((service: any) => {
+            // تحقق من عدم تكرار الخدمات (باستخدام service.id)
+            if (!allServices.some((s) => s.value === String(service.id))) {
+              allServices.push({
+                value: String(service.id),
+                label: service.name,
+                cost: parseFloat(service.cost) || 0,
+                price: parseFloat(service.price) || 0,
+                id: service.id,
+                name: service.name,
+                quantity: 1,
+              });
+            }
           });
-        });
-      }
+        }
+      });
     });
 
     return allServices;
@@ -306,26 +331,33 @@ const EditAppoientment = () => {
 
   const calculateTotal = (): number => {
     return fields.reduce((total, item) => {
-      if (item.service_id) {
+      const quantity = item.quantity || 1;
+
+      // تحقق إذا كانت خدمة قياسية
+      if (
+        item.service_id &&
+        item.service_id !== "null" &&
+        item.service_id !== ""
+      ) {
         const service = serviceOptions.find((s) => s.value === item.service_id);
-        return total + (service?.price || 0) * (item.quantity || 1);
+        const price = service?.price || 0;
+        return total + price * quantity;
       } else {
-        return total + (item.custom_price || 0) * (item.quantity || 1);
+        // خدمة مخصصة
+        const price = item.custom_price || 0;
+        return total + price * quantity;
       }
     }, 0);
   };
-
   const handleFormSubmit = async (data: ExtendedAppointmentFormData) => {
-    // Normalize fields → convert numeric strings to numbers
-    if (!data.patment_method) {
-      data.patment_method = "cash";
-    }
-    if (!data.transaction_status) {
-      data.transaction_status = "pending";
-    }
+    // معالجة service_id بشكل صحيح
     const itemsToSend = fields.map((item) => ({
       id: item.id,
-      service_id: item.service_id ? Number(item.service_id) : null,
+      // تحويل "null" إلى null فعلي
+      service_id:
+        item.service_id && item.service_id !== "null"
+          ? Number(item.service_id)
+          : null,
       custom_name: item.custom_name ?? null,
       custom_cost: item.custom_cost ? Number(item.custom_cost) : null,
       custom_price: item.custom_price ? Number(item.custom_price) : null,
@@ -336,22 +368,21 @@ const EditAppoientment = () => {
       ...data,
       items: itemsToSend,
     };
-    console.log("itemsToSend", payload);
+
+    console.log("Submitting payload:", payload);
+
     try {
       if (isEditMode) {
         const response = await editAppointment({
           id: idAppointment,
           data: payload,
         }).unwrap();
-        console.log("response", response);
         toast.success(response.message);
       }
     } catch (error: unknown | any) {
-      console.error("Error creating consultation request:", error);
+      console.error("Error updating appointment:", error);
       toast.error(error?.data?.message);
     }
-
-    console.log("payload", payload);
   };
 
   return (
@@ -696,9 +727,7 @@ const EditAppoientment = () => {
 
         {/* قسم الخدمات والمنتجات */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">
-            Service Items
-          </h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Service</h3>
 
           {/* إضافة خدمة موجودة */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -706,7 +735,7 @@ const EditAppoientment = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Select Item
+                  Select Services
                 </label>
                 <Select<ServiceOption>
                   options={serviceOptions}
@@ -742,12 +771,12 @@ const EditAppoientment = () => {
           {/* إضافة عنصر مخصص */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold text-gray-700 mb-3">
-              Additional Items
+              Additional Services
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Item Name
+                  service Name
                 </label>
                 <input
                   type="text"
@@ -797,7 +826,7 @@ const EditAppoientment = () => {
                   onClick={handleAddCustomItem}
                   className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  Add Item
+                  Add Services
                 </button>
               </div>
             </div>
@@ -806,7 +835,9 @@ const EditAppoientment = () => {
           {/* قائمة العناصر المضافة */}
           {fields.length > 0 && (
             <div className="mt-6">
-              <h4 className="font-semibold text-gray-700 mb-3">Added Items</h4>
+              <h4 className="font-semibold text-gray-700 mb-3">
+                Added Services
+              </h4>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-300">
                   <thead>
@@ -834,19 +865,28 @@ const EditAppoientment = () => {
                   <tbody>
                     {fields.map((field, index) => {
                       const item = field;
+
+                      // تحديد إذا كانت خدمة قياسية أم مخصصة
+                      const isStandardService =
+                        item.service_id &&
+                        item.service_id !== "null" &&
+                        item.service_id !== "";
+
                       let name = "";
                       let cost = 0;
                       let price = 0;
 
-                      if (item.service_id) {
+                      if (isStandardService) {
+                        // البحث عن الخدمة القياسية
                         const service = serviceOptions.find(
                           (s) => s.value === item.service_id
                         );
-                        name = service?.label || "";
+                        name = service?.label || `Service #${item.service_id}`;
                         cost = service?.cost || 0;
                         price = service?.price || 0;
                       } else {
-                        name = item.custom_name || "";
+                        // خدمة مخصصة
+                        name = item.custom_name || "Custom Item";
                         cost = item.custom_cost || 0;
                         price = item.custom_price || 0;
                       }
@@ -857,38 +897,51 @@ const EditAppoientment = () => {
                       return (
                         <tr key={field.id}>
                           <td className="border border-gray-300 px-4 py-2">
-                            {name}
+                            <div>
+                              <div className="font-medium">{name}</div>
+                              {isStandardService ? (
+                                <div className="text-xs text-blue-600">
+                                  Standard Service
+                                </div>
+                              ) : (
+                                <div className="text-xs text-yellow-600">
+                                  Custom Service
+                                </div>
+                              )}
+                            </div>
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
-                            ${cost}
+                            SAR {cost.toFixed(2)}
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
-                            ${price}
+                            SAR {price.toFixed(2)}
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <input
-                              disabled
+                              type="number"
                               min="1"
-                              defaultValue={quantity}
+                              value={quantity}
                               onChange={(e) => {
-                                setValue(
-                                  `items.${index}.quantity`,
+                                const newValue = Math.max(
+                                  1,
                                   Number(e.target.value)
                                 );
+                                setValue(`items.${index}.quantity`, newValue);
                               }}
                               className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
                             />
                           </td>
-                          <td className="border border-gray-300 px-4 py-2">
-                            ${total}
+                          <td className="border border-gray-300 px-4 py-2 font-semibold">
+                            SAR {total.toFixed(2)}
                           </td>
                           <td className="border border-gray-300 px-4 py-2 text-center">
                             <button
                               type="button"
                               onClick={() => remove(index)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded"
+                              title="Remove item"
                             >
-                              <FiTrash2 />
+                              <FiTrash2 size={18} />
                             </button>
                           </td>
                         </tr>

@@ -256,7 +256,7 @@ const router = createBrowserRouter(
             path="services"
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
-                <Services />
+                <AppointmentsItems />
               </ProtectedRoute>
             }
           />
@@ -277,7 +277,7 @@ const router = createBrowserRouter(
             }
           />
           <Route
-            path="appointments/items"
+            path="services"
             element={
               <ProtectedRoute isAllowed={!!token} redirectPath="/login">
                 <AppointmentsItems />

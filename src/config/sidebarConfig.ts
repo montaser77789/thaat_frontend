@@ -101,8 +101,8 @@ export const sidebarSections: SidebarSection[] = [
           type: "link",
           item: {
             id: "partners_items",
-            label: "Items",
-            href: "/admins/appointments/items",
+            label: "Services",
+            href: "/admins/services",
             icon: FiPackage,
           },
         },
@@ -139,15 +139,15 @@ export const sidebarSections: SidebarSection[] = [
             icon: FiSettings,
           },
         },
-        {
-          type: "link",
-          item: {
-            id: "services",
-            label: "Services",
-            href: "/admins/services",
-            icon: FiFileText,
-          },
-        },
+        // {
+        //   type: "link",
+        //   item: {
+        //     id: "services",
+        //     label: "Services",
+        //     href: "/admins/services",
+        //     icon: FiFileText,
+        //   },
+        // },
         {
           type: "link",
           item: {
